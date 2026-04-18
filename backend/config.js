@@ -8,11 +8,20 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: join(__dirname, '.env') });
 
+// For Railway deployment, use environment variables
+// Remove quotes if they exist (Railway sometimes adds them)
+const getEnvValue = (key) => {
+  let value = process.env[key] || '';
+  // Remove surrounding quotes if present
+  return value.replace(/^["']|["']$/g, '');
+};
+
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: getEnvValue('DB_HOST') || 'mysql',  // Default to 'mysql' service name in Railway
+  user: getEnvValue('DB_USER') || 'root',
+  password: getEnvValue('DB_PASSWORD'),
+  database: getEnvValue('DB_NAME') || 'railway',
+  port: getEnvValue('DB_PORT') || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
