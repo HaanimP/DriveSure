@@ -1,0 +1,563 @@
+<template>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p class="header-subtitle">System overview and management</p>
+      </div>
+      <div class="header-stats">
+        <div class="total-stat">
+          <span class="total-label">Total Users</span>
+          <span class="total-number">{{ allUsers.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- Stats Container -->
+      <div class="stats-container">
+        <div class="stat-card requests">
+          <div class="stat-header">
+            <div class="stat-icon">📋</div>
+            <div class="stat-title">Requests</div>
+          </div>
+          <div class="stat-main-number">{{ allRequests.length }}</div>
+          <div class="stat-bar">
+            <div class="stat-bar-fill requests" :style="{ width: allRequests.length > 0 ? '100%' : '0%' }"></div>
+          </div>
+          <div class="stat-footer">Total requests in system</div>
+        </div>
+
+        <div class="stat-card users">
+          <div class="stat-header">
+            <div class="stat-icon">👥</div>
+            <div class="stat-title">Users</div>
+          </div>
+          <div class="stat-main-number">{{ allUsers.length }}</div>
+          <div class="stat-bar">
+            <div class="stat-bar-fill users" :style="{ width: allUsers.length > 0 ? '100%' : '0%' }"></div>
+          </div>
+          <div class="stat-footer">Total registered users</div>
+        </div>
+
+        <div class="stat-card reviews">
+          <div class="stat-header">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-title">Reviews</div>
+          </div>
+          <div class="stat-main-number">{{ allReviews.length }}</div>
+          <div class="stat-bar">
+            <div class="stat-bar-fill reviews" :style="{ width: allReviews.length > 0 ? '100%' : '0%' }"></div>
+          </div>
+          <div class="stat-footer">Total customer reviews</div>
+        </div>
+      </div>
+
+      <!-- Requests Section -->
+      <div class="requests-section">
+        <h2>📋 All Requests</h2>
+        <p class="section-subtitle">{{ allRequests.length }} total request(s)</p>
+
+        <div v-if="loadingRequests" class="loading">Loading requests...</div>
+        
+        <div v-else-if="allRequests.length === 0" class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>No Requests</h3>
+          <p>No customer requests yet</p>
+        </div>
+
+        <div v-else class="requests-grid">
+          <div v-for="request in allRequests" :key="request.id" class="request-card">
+            <div class="request-header">
+              <div class="customer-info">
+                <h3>{{ request.first_name }} {{ request.last_name }}</h3>
+                <p class="email">{{ request.email }}</p>
+              </div>
+              <span class="status-badge" :class="request.status">{{ request.status }}</span>
+            </div>
+
+            <div class="request-details">
+              <div class="detail">
+                <label>Vehicle:</label>
+                <span>{{ request.make }} - {{ request.car_type }}</span>
+              </div>
+              <div class="detail">
+                <label>Budget:</label>
+                <span>R {{ request.budget_min?.toLocaleString() }} - R {{ request.budget_max?.toLocaleString() }}</span>
+              </div>
+              <div class="detail">
+                <label>Location:</label>
+                <span>{{ request.area }}</span>
+              </div>
+              <div class="detail">
+                <label>Plan:</label>
+                <span class="plan-badge">{{ request.plan }}</span>
+              </div>
+              <div class="detail">
+                <label>Date:</label>
+                <span>{{ formatDate(request.created_at) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Section -->
+      <div class="requests-section">
+        <h2>👥 All Users</h2>
+        <p class="section-subtitle">{{ allUsers.length }} total user(s)</p>
+
+        <div v-if="loadingUsers" class="loading">Loading users...</div>
+        
+        <div v-else-if="allUsers.length === 0" class="empty-state">
+          <div class="empty-state-icon">👤</div>
+          <h3>No Users</h3>
+          <p>No registered users yet</p>
+        </div>
+
+        <div v-else class="requests-grid">
+          <div v-for="user in allUsers" :key="user.id" class="request-card">
+            <div class="request-header">
+              <div class="customer-info">
+                <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                <p class="email">{{ user.email }}</p>
+              </div>
+              <span class="role-badge" :class="user.role">{{ user.role }}</span>
+            </div>
+
+            <div class="request-details">
+              <div class="detail">
+                <label>Phone:</label>
+                <span>{{ user.phone || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Role:</label>
+                <span class="plan-badge">{{ user.role }}</span>
+              </div>
+              <div class="detail">
+                <label>Joined:</label>
+                <span>{{ formatDate(user.created_at) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="requests-section">
+        <h2>⭐ Customer Reviews</h2>
+        <p class="section-subtitle">{{ allReviews.length }} total review(s)</p>
+
+        <div v-if="loadingReviews" class="loading">Loading reviews...</div>
+        
+        <div v-else-if="allReviews.length === 0" class="empty-state">
+          <div class="empty-state-icon">⭐</div>
+          <h3>No Reviews</h3>
+          <p>No customer reviews yet</p>
+        </div>
+
+        <div v-else class="requests-grid">
+          <div v-for="review in allReviews" :key="review.id" class="request-card">
+            <div class="request-header">
+              <div class="customer-info">
+                <h3>{{ review.user_name }}</h3>
+                <p class="email">Plan: {{ review.plan }}</p>
+              </div>
+              <div class="stars">
+                <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
+              </div>
+            </div>
+
+            <div class="review-text">
+              {{ review.text }}
+            </div>
+
+            <div class="review-footer">
+              <span class="review-date">{{ formatDate(review.created_at) }}</span>
+              <span v-if="review.approved" class="approved-badge">✓ Approved</span>
+              <span v-else class="pending-badge">⏳ Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+                <span>{{ selectedRequest.plan }}</span>
+              </div>
+              <div class="detail">
+                <label>Year Range:</label>
+                <span>{{ selectedRequest.year_range }}</span>
+              </div>
+              <div class="detail">
+                <label>Budget:</label>
+                <span>R {{ selectedRequest.budget_min?.toLocaleString() }} - R {{ selectedRequest.budget_max?.toLocaleString() }}</span>
+              </div>
+              <div v-if="selectedRequest.viewing_preference" class="detail">
+                <label>Viewing Preference:</label>
+                <span>{{ selectedRequest.viewing_preference }}</span>
+              </div>
+              <div v-if="selectedRequest.notes" class="detail">
+                <label>Notes:</label>
+                <span class="notes">{{ selectedRequest.notes }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div v-if="activeTab === 'users'" class="tab-content">
+        <h2>System Users</h2>
+        <p class="tab-subtitle">Manage all users</p>
+        <div class="placeholder">
+          <p>👥 User management coming soon</p>
+        </div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div v-if="activeTab === 'reviews'" class="tab-content">
+        <h2>Customer Reviews</h2>
+        <p class="tab-subtitle">Moderate and approve reviews</p>
+        <div class="placeholder">
+          <p>⭐ Review moderation coming soon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from 'vue'
+import apiClient from '../api'
+
+export default {
+  setup() {
+    const activeTab = ref('requests')
+    const allRequests = ref([])
+    const loadingRequests = ref(false)
+    const selectedRequest = ref(null)
+
+    onMounted(async () => {
+      await fetchAllRequests()
+    })
+
+    const fetchAllRequests = async () => {
+      try {
+        loadingRequests.value = true
+        const result = await apiClient.get('/requests/all')
+        allRequests.value = result.requests || []
+      } catch (err) {
+        console.error('Error loading requests:', err)
+      } finally {
+        loadingRequests.value = false
+      }
+    }
+
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A'
+      return new Date(dateString).toLocaleDateString('en-ZA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    }
+
+    return {
+      activeTab,
+      allRequests,
+      loadingRequests,
+      selectedRequest,
+      fetchAllRequests,
+      formatDate
+    }
+  }
+}
+</script>
+
+<style scoped>
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f4f6fb 0%, #e8eef8 100%);
+  padding: 2rem;
+  padding-top: 100px;
+}
+
+body.dark-mode .dashboard {
+  background: linear-gradient(160deg, #0f0f0f 0%, #1a1a1a 100%);
+}
+
+.dashboard-header {
+  max-width: 1400px;
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dashboard-header h1 {
+  color: var(--text);
+  margin: 0;
+}
+
+.dashboard-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-light);
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--gray);
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.tab-btn.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.tab-btn:hover {
+  color: var(--blue);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content h2 {
+  color: var(--text);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.tab-subtitle {
+  color: var(--gray);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray);
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder {
+  text-align: center;
+  padding: 3rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  color: var(--gray);
+}
+
+.requests-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--gray-light);
+}
+
+.admin-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-light);
+  color: var(--text);
+}
+
+.admin-table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.completed {
+  background: #dcfce7;
+  color: #065f46;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.plan-badge {
+  display: inline-block;
+  background: var(--bg-secondary);
+  color: var(--blue);
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.request-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--gray);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail label {
+  font-weight: 600;
+  color: var(--gray);
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
+.detail span {
+  color: var(--text);
+}
+
+.notes {
+  white-space: pre-wrap;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-table {
+    font-size: 0.85rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

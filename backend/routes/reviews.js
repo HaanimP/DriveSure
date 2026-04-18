@@ -1,0 +1,90 @@
+import express from 'express';
+import pool from '../config.js';
+
+const router = express.Router();
+
+// Create review
+router.post('/', async (req, res) => {
+  try {
+    const { userId, userName, stars, text, plan } = req.body;
+    console.log('📝 Creating review with data:', { userId, userName, stars, text, plan });
+
+    if (!userId || !stars || !text) {
+      console.warn('⚠️ Missing required fields:', { userId, stars, text });
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const connection = await pool.getConnection();
+    const [result] = await connection.query(
+      `INSERT INTO reviews (user_id, user_name, stars, text, plan, approved)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, userName, stars, text, plan || '', true]
+    );
+
+    console.log('✅ Review created with ID:', result.insertId);
+    connection.release();
+    res.json({ id: result.insertId, message: 'Review posted successfully' });
+  } catch (error) {
+    console.error('❌ Create review error:', error);
+    res.status(500).json({ error: 'Failed to create review' });
+  }
+});
+
+// Get approved reviews
+router.get('/', async (req, res) => {
+  try {
+    console.log('📊 GET /reviews called');
+    const connection = await pool.getConnection();
+    const [reviews] = await connection.query('SELECT * FROM reviews WHERE approved = true ORDER BY created_at DESC');
+    console.log('✅ Query result:', reviews);
+    console.log('✅ Review count:', reviews.length);
+    connection.release();
+    res.json(reviews);
+  } catch (error) {
+    console.error('❌ Get reviews error:', error);
+    res.status(500).json({ error: 'Failed to get reviews' });
+  }
+});
+
+// Get all reviews (admin)
+router.get('/admin/all', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [reviews] = await connection.query('SELECT * FROM reviews ORDER BY created_at DESC');
+    connection.release();
+    res.json(reviews);
+  } catch (error) {
+    console.error('Get all reviews error:', error);
+    res.status(500).json({ error: 'Failed to get reviews' });
+  }
+});
+
+// Approve review
+router.put('/:id/approve', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await pool.getConnection();
+    await connection.query('UPDATE reviews SET approved = true WHERE id = ?', [id]);
+    connection.release();
+    res.json({ message: 'Review approved' });
+  } catch (error) {
+    console.error('Approve review error:', error);
+    res.status(500).json({ error: 'Failed to approve review' });
+  }
+});
+
+// Delete review
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await pool.getConnection();
+    await connection.query('DELETE FROM reviews WHERE id = ?', [id]);
+    connection.release();
+    res.json({ message: 'Review deleted' });
+  } catch (error) {
+    console.error('Delete review error:', error);
+    res.status(500).json({ error: 'Failed to delete review' });
+  }
+});
+
+export default router;

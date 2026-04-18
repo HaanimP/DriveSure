@@ -1,0 +1,103 @@
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import pool from '../config.js';
+
+const router = express.Router();
+
+// Register
+router.post('/register', async (req, res) => {
+  try {
+    const { first, last, email, phone, password } = req.body;
+
+    if (!first || !last || !email || !password) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const connection = await pool.getConnection();
+
+    // Check if user exists
+    const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      connection.release();
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert user
+    const [result] = await connection.query(
+      'INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+      [first, last, email, phone || '', hashedPassword, 'customer']
+    );
+
+    connection.release();
+
+    const user = { id: result.insertId, first, last, email, role: 'customer' };
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({ user, token });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+// Login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const connection = await pool.getConnection();
+    console.log(`[LOGIN] Querying user: ${email}`);
+    
+    const [users] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
+    connection.release();
+
+    if (users.length === 0) {
+      console.log(`[LOGIN] User not found: ${email}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const user = users[0];
+    console.log(`[LOGIN] User found: ${user.first_name} ${user.last_name} (role: ${user.role})`);
+    
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log(`[LOGIN] Password match: ${passwordMatch}`);
+
+    if (!passwordMatch) {
+      console.log(`[LOGIN] Invalid password for user: ${email}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const userResponse = { id: user.id, first: user.first_name, last: user.last_name, email: user.email, role: user.role };
+    const token = jwt.sign(userResponse, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    console.log(`[LOGIN] Login successful for: ${email}`);
+    res.json({ user: userResponse, token });
+  } catch (error) {
+    console.error('[LOGIN] Error:', error.message);
+    console.error('[LOGIN] Stack:', error.stack);
+    res.status(500).json({ error: 'Login failed', details: error.message });
+  }
+});
+
+// Verify token
+router.post('/verify', (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: 'Token required' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ user: decoded, valid: true });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token', valid: false });
+  }
+});
+
+export default router;

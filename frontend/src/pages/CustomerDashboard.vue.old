@@ -1,0 +1,455 @@
+<template>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>Customer Dashboard</h1>
+      <div class="dashboard-tabs">
+        <button 
+          v-for="tab in ['request', 'myrequests', 'review']"
+          :key="tab"
+          @click="activeTab = tab"
+          class="dashboard-tab"
+          :class="{ active: activeTab === tab }"
+        >
+          {{ tab === 'request' ? 'Request Car' : tab === 'myrequests' ? 'My Requests' : 'Leave Review' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- Request Car Tab -->
+      <div v-if="activeTab === 'request'" class="dashboard-panel">
+        <h2>Submit a Car Request</h2>
+        <p style="margin-bottom: 1.5rem; color: #666;">Choose your service plan first, then fill in your vehicle details.</p>
+        <form @submit.prevent="submitRequest">
+          <div class="form-group">
+            <label>Car Type *</label>
+            <select v-model="requestForm.car_type" required>
+              <option value="">Select...</option>
+              <option value="car">Car</option>
+              <option value="bakkie">Bakkie</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Make/Brand *</label>
+            <input v-model="requestForm.make" placeholder="Toyota, BMW, etc." required>
+          </div>
+          <div class="form-group">
+            <label>Year Range *</label>
+            <input v-model="requestForm.year_range" placeholder="e.g., 2018-2022" required>
+          </div>
+          <div class="form-group">
+            <label>Budget Min (R) *</label>
+            <input v-model.number="requestForm.budget_min" type="number" required>
+          </div>
+          <div class="form-group">
+            <label>Budget Max (R) *</label>
+            <input v-model.number="requestForm.budget_max" type="number" required>
+          </div>
+          <div class="form-group">
+            <label>Area *</label>
+            <input v-model="requestForm.area" placeholder="Cape Town, Johannesburg, etc." required>
+          </div>
+          <div class="form-group">
+            <label>Additional Notes</label>
+            <textarea v-model="requestForm.notes" placeholder="Any specific requirements..." rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" :disabled="loading">
+            {{ loading ? 'Submitting...' : 'Submit Request' }}
+          </button>
+          <p v-if="requestError" class="error-message">{{ requestError }}</p>
+          <p v-if="requestSuccess" class="success-message">{{ requestSuccess }}</p>
+        </form>
+      </div>
+
+      <!-- My Requests Tab -->
+      <div v-if="activeTab === 'myrequests'" class="dashboard-panel">
+        <h2>My Requests</h2>
+        <div v-if="myRequests.length === 0" class="empty-state">
+          <div class="empty-state-icon">📝</div>
+          <p>No requests yet. Submit your first request!</p>
+        </div>
+        <div v-else>
+          <div v-for="req in myRequests" :key="req.id" class="request-card">
+            <div class="request-header">
+              <h3>{{ req.car_type }} - {{ req.make || 'Any' }}</h3>
+              <span class="status-badge" :class="'status-' + req.status">{{ req.status }}</span>
+            </div>
+            <p>Budget: R{{ req.budget_min.toLocaleString() }} - R{{ req.budget_max.toLocaleString() }}</p>
+            <p>Area: {{ req.area }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Tab -->
+      <div v-if="activeTab === 'review'" class="dashboard-panel">
+        <h2>Leave a Review</h2>
+        <form @submit.prevent="submitReview">
+          <div class="form-group">
+            <label>Rating *</label>
+            <div class="star-rating">
+              <button 
+                v-for="n in 5"
+                :key="n"
+                type="button"
+                @click="reviewForm.stars = n"
+                class="star-button"
+                :class="{ lit: n <= reviewForm.stars }"
+              >
+                ★
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Plan Used</label>
+            <select v-model="reviewForm.plan">
+              <option value="Basic">Basic</option>
+              <option value="Premium">Premium</option>
+              <option value="Platinum">Platinum</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Your Review *</label>
+            <textarea v-model="reviewForm.text" placeholder="Tell us about your experience..." rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from 'vue'
+import apiClient from '../api'
+
+export default {
+  setup() {
+    const activeTab = ref('request')
+    const myRequests = ref([])
+    const loading = ref(false)
+    const requestError = ref('')
+    const requestSuccess = ref('')
+    const requestForm = ref({
+      car_type: '',
+      make: '',
+      year_range: '',
+      budget_min: null,
+      budget_max: null,
+      area: '',
+      notes: ''
+    })
+    const reviewForm = ref({
+      stars: 0,
+      plan: 'Premium',
+      text: ''
+    })
+
+    onMounted(async () => {
+      await loadMyRequests()
+    })
+
+    const loadMyRequests = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('driveSureUser') || '{}')
+        if (!userData.id) {
+          console.log('No user ID found')
+          return
+        }
+        const result = await apiClient.get(`/requests/user/${userData.id}`)
+        myRequests.value = result.requests || result
+      } catch (err) {
+        console.error('Error loading requests:', err)
+      }
+    }
+
+    const submitRequest = async () => {
+      try {
+        requestError.value = ''
+        requestSuccess.value = ''
+
+        console.log('🔍 DEBUG: Current form values:', {
+          car_type: requestForm.value.car_type,
+          make: requestForm.value.make,
+          year_range: requestForm.value.year_range,
+          budget_min: requestForm.value.budget_min,
+          budget_max: requestForm.value.budget_max,
+          area: requestForm.value.area,
+          notes: requestForm.value.notes
+        })
+
+        // Validate all required fields
+        if (!requestForm.value.car_type) {
+          requestError.value = 'Please select a car type'
+          console.log('❌ car_type is empty')
+          return
+        }
+        if (!requestForm.value.make) {
+          requestError.value = 'Please enter the car make/brand'
+          console.log('❌ make is empty')
+          return
+        }
+        if (!requestForm.value.year_range) {
+          requestError.value = 'Please enter the year range'
+          console.log('❌ year_range is empty')
+          return
+        }
+        if (!requestForm.value.budget_min || requestForm.value.budget_min <= 0) {
+          requestError.value = 'Please enter a valid minimum budget'
+          console.log('❌ budget_min invalid:', requestForm.value.budget_min)
+          return
+        }
+        if (!requestForm.value.budget_max || requestForm.value.budget_max <= 0) {
+          requestError.value = 'Please enter a valid maximum budget'
+          console.log('❌ budget_max invalid:', requestForm.value.budget_max)
+          return
+        }
+        if (requestForm.value.budget_max < requestForm.value.budget_min) {
+          requestError.value = 'Maximum budget must be greater than minimum budget'
+          return
+        }
+        if (!requestForm.value.area) {
+          requestError.value = 'Please enter your location/area'
+          console.log('❌ area is empty')
+          return
+        }
+
+        console.log('✅ All validations passed')
+        loading.value = true
+
+        const userData = JSON.parse(localStorage.getItem('driveSureUser') || '{}')
+        const plan = sessionStorage.getItem('selectedPlan') || 'Premium'
+
+        console.log('👤 User:', userData.id)
+        console.log('📦 Plan:', plan)
+
+        if (!userData.id) {
+          requestError.value = 'User information not found. Please log in again.'
+          console.log('❌ No user id')
+          return
+        }
+
+        const requestData = {
+          user_id: userData.id,
+          car_type: requestForm.value.car_type,
+          make: requestForm.value.make,
+          year_range: requestForm.value.year_range,
+          budget_min: Number(requestForm.value.budget_min),
+          budget_max: Number(requestForm.value.budget_max),
+          area: requestForm.value.area,
+          plan: plan,
+          notes: requestForm.value.notes
+        }
+
+        console.log('📋 COMPLETE Sending data:', JSON.stringify(requestData, null, 2))
+        console.log('Types:', {
+          user_id: typeof userData.id,
+          car_type: typeof requestForm.value.car_type,
+          make: typeof requestForm.value.make,
+          year_range: typeof requestForm.value.year_range,
+          budget_min: typeof requestForm.value.budget_min,
+          budget_max: typeof requestForm.value.budget_max,
+          area: typeof requestForm.value.area,
+          plan: typeof plan
+        })
+        await apiClient.post('/requests', requestData)
+        requestSuccess.value = '✅ Request submitted successfully!'
+        requestForm.value = { car_type: '', make: '', year_range: '', budget_min: null, budget_max: null, area: '', notes: '' }
+        await loadMyRequests()
+        setTimeout(() => {
+          activeTab.value = 'myrequests'
+        }, 1500)
+      } catch (err) {
+        console.error('❌ Error:', err)
+        const errorMessage = err.response?.data?.error || err.message || 'Failed to submit request'
+        const missingFields = err.response?.data?.missingFields
+        if (missingFields && missingFields.length > 0) {
+          requestError.value = `Missing fields: ${missingFields.join(', ')}`
+          console.log('Backend missing:', missingFields)
+        } else {
+          requestError.value = errorMessage
+        }
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const submitReview = async () => {
+      try {
+        if (!reviewForm.value.stars) {
+          alert('Please select a rating')
+          return
+        }
+        if (!reviewForm.value.text) {
+          alert('Please write your review')
+          return
+        }
+
+        const userData = JSON.parse(localStorage.getItem('driveSureUser') || '{}')
+        if (!userData.id) {
+          alert('User information not found. Please log in again.')
+          return
+        }
+
+        const reviewData = {
+          userId: userData.id,
+          userName: userData.first_name || 'Anonymous',
+          stars: reviewForm.value.stars,
+          text: reviewForm.value.text,
+          plan: reviewForm.value.plan
+        }
+
+        await apiClient.post('/reviews', reviewData)
+        alert('✅ Review submitted! It will appear once approved.')
+        reviewForm.value = { stars: 0, plan: 'Premium', text: '' }
+      } catch (err) {
+        alert('❌ Error: ' + err.message)
+      }
+    }
+
+    return {
+      activeTab,
+      myRequests,
+      requestForm,
+      reviewForm,
+      submitRequest,
+      submitReview,
+      loading,
+      requestError,
+      requestSuccess
+    }
+  }
+}
+</script>
+
+<style scoped>
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f4f6fb 0%, #e8eef8 100%);
+  padding: 2rem;
+  padding-top: 100px;
+}
+
+body.dark-mode .dashboard {
+  background: linear-gradient(160deg, #0f0f0f 0%, #1a1a1a 100%);
+}
+
+.dashboard-header {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h1 {
+  color: var(--blue);
+  margin-bottom: 1rem;
+}
+
+.dashboard-controls {
+  display: none;
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 2px solid var(--gray-light);
+}
+
+.dashboard-tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  color: var(--gray);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.dashboard-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-panel {
+  background: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--gray-light);
+}
+
+.request-card {
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.request-header h3 {
+  color: var(--blue);
+  margin: 0;
+}
+
+.star-rating {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.star-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-button.lit {
+  color: #ffc107;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--gray);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.success-message {
+  color: #388e3c;
+  background: rgba(56, 142, 60, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+</style>

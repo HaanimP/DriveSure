@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drive Sure – Your Trusted Vehicle Sourcing Partner</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1a3a6b;
+    --blue-mid: #2255a4;
+    --blue-light: #e8eef8;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --white: #ffffff;
+    --off-white: #f4f6fb;
+    --gray: #6b7280;
+    --gray-light: #e5e7eb;
+    --text: #111827;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* PAYMENT PAGE */
+  .payment-page {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0d1f3c 0%, #1a3a6b 50%, #0d1f3c 100%);
+    padding-top: 64px;
+    color: var(--white);
+  }
+
+  .payment-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .payment-header {
+    margin-bottom: 2rem;
+  }
+
+  .payment-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .payment-info-box {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .payment-detail {
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+
+  .payment-detail label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .payment-detail-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--white);
+    word-break: break-all;
+    background: rgba(0,0,0,0.2);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .copy-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .copy-btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  .payment-steps {
+    background: rgba(192,57,43,0.1);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .payment-steps h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+  }
+
+  .payment-steps ol {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .payment-steps li {
+    margin-bottom: 0.75rem;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .whatsapp-btn {
+    background: #25D366;
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(37,211,102,0.3);
+  }
+
+  .whatsapp-btn:hover {
+    background: #1fad56;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37,211,102,0.4);
+  }
+
+  .back-btn, .logout-payment-btn {
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+
+  .back-btn:hover, .logout-payment-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  .payment-note {
+    background: rgba(245,158,11,0.15);
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    text-align: left;
+    color: rgba(255,255,255,0.9);
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(26,58,107,0.97);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 64px;
+    border-bottom: 2px solid var(--red);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; letter-spacing: 2px; color: var(--white);
+    cursor: pointer;
+    animation: slideInDown 0.6s ease;
+  }
+
+  .nav-logo span { color: var(--red); font-weight: bold; }
+
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+
+  .nav-links a {
+    color: rgba(255,255,255,0.8); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500; cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-btn {
+    background: var(--red); color: var(--white);
+    border: none; padding: 0.5rem 1.2rem;
+    border-radius: 6px; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: background 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .nav-btn:hover { background: #a93226; }
+
+  .hamburger-btn {
+    display: none; background: none; border: none;
+    color: var(--white); font-size: 1.5rem; cursor: pointer;
+    padding: 0.5rem; font-family: 'DM Sans', sans-serif;
+  }
+
+  @media (max-width: 768px) {
+    .hamburger-btn { display: block; }
+    .nav-links {
+      display: none; position: absolute; top: 64px;
+      left: 0; right: 0; flex-direction: column;
+      background: rgba(26,58,107,0.98); gap: 0;
+      padding: 1rem 0; border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { display: block; padding: 0.75rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-links .nav-btn { width: calc(100% - 4rem); margin: 0.75rem 2rem; }
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0d1f3c 0%, #1a3a6b 50%, #0d1f3c 100%);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 100px 2rem 2rem;
+  }
+
+  .hero-bg-cars {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    opacity: 0.07; pointer-events: none;
+  }
+
+  .hero-stripes {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent, transparent 80px,
+      rgba(255,255,255,0.015) 80px, rgba(255,255,255,0.015) 82px
+    );
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 800px; }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(192,57,43,0.9); color: var(--white);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 2px;
+    padding: 0.4rem 1.2rem; border-radius: 50px; margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    animation: fadeUp 0.6s ease both;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(192,57,43,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    line-height: 1.05; color: var(--white);
+    letter-spacing: 2px; margin-bottom: 1.5rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+    text-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .hero h1 span { 
+    color: var(--red); 
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+  }
+
+  .hero p {
+    font-size: 1.1rem; color: rgba(255,255,255,0.75);
+    line-height: 1.7; max-width: 580px; margin: 0 auto 2.5rem;
+    font-weight: 300;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-btns {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--red); color: var(--white);
+    border: none; padding: 0.85rem 2rem;
+    border-radius: 8px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s; font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 15px rgba(192,57,43,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    transition: left 0.3s;
+    z-index: 1;
+  }
+
+  .btn-primary:hover {
+    background: #a93226;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(192,57,43,0.4);
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary span { position: relative; z-index: 2; }
+
+  .btn-secondary {
+    background: transparent; color: var(--white);
+    border: 2px solid rgba(255,255,255,0.4); padding: 0.85rem 2rem;
+    border-radius: 8px; font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: all 0.3s; font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-secondary:hover { 
+    border-color: var(--white); 
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+  }
+
+  /* ─── CAR SILHOUETTES ─── */
+  .silhouette-row {
+    display: flex; align-items: flex-end; gap: 3rem;
+    padding: 0 2rem; justify-content: center;
+  }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 5rem 2rem; }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-tag {
+    display: inline-block;
+    background: var(--red-light); color: var(--red);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 2px;
+    padding: 0.3rem 1rem; border-radius: 20px; margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--blue); letter-spacing: 1px; margin-bottom: 0.75rem;
+  }
+
+  .section-sub {
+    color: var(--gray); font-size: 1rem; line-height: 1.7;
+    max-width: 560px; font-weight: 300;
+  }
+
+  /* ─── HOW IT WORKS ─── */
+  .how-bg { background: var(--off-white); }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem; margin-top: 3rem;
+  }
+
+.step {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    border: 1px solid var(--gray-light);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: scaleInUp 0.6s ease both;
+  }
+
+  .step:nth-child(1) { animation-delay: 0.1s; }
+  .step:nth-child(2) { animation-delay: 0.2s; }
+  .step:nth-child(3) { animation-delay: 0.3s; }
+  .step:nth-child(4) { animation-delay: 0.4s; }
+
+  .step:hover { 
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(26,58,107,0.2);
+  }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem; color: var(--blue-light);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+
+  .step-icon {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: linear-gradient(135deg, #1a3a6b, #2255a4);
+    display: flex; align-items: center;
+    justify-content: center; margin-bottom: 1rem;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 15px rgba(26,58,107,0.2);
+    transition: all 0.3s;
+  }
+
+  .step:hover .step-icon {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(26,58,107,0.35);
+  }
+
+  .step h3 { font-size: 1.05rem; font-weight: 600; color: var(--blue); margin-bottom: 0.5rem; }
+  .step p { font-size: 0.9rem; color: var(--gray); line-height: 1.6; }
+
+  /* ─── PLANS ─── */
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem; margin-top: 3rem;
+  }
+
+  .plan-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 2px solid var(--gray-light);
+    padding: 2rem; position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: scaleInUp 0.6s ease both;
+  }
+
+  .plan-card:nth-child(1) { animation-delay: 0.1s; }
+  .plan-card:nth-child(2) { animation-delay: 0.2s; }
+  .plan-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .plan-card.featured {
+    border-color: var(--gray-light);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  .plan-card:hover { 
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(26,58,107,0.2);
+  }
+
+  .plan-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: #f59e0b; color: var(--white);
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;
+    padding: 0.3rem 1rem; border-radius: 50px; white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+    display: none;
+  }
+
+  .plan-card.featured .plan-badge {
+    display: inline-block;
+  }
+
+  .plan-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: 1px; color: var(--blue);
+    margin-bottom: 0.25rem;
+  }
+
+  .plan-price {
+    font-size: 2.2rem; font-weight: 700; color: var(--red);
+    margin-bottom: 0.25rem;
+  }
+
+  .plan-price span { font-size: 1rem; color: var(--gray); font-weight: 400; }
+
+  .plan-note { font-size: 0.8rem; color: var(--gray); margin-bottom: 1.5rem; font-style: italic; }
+
+  .plan-features { list-style: none; margin-bottom: 2rem; }
+
+  .plan-features li {
+    font-size: 0.9rem; padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-light);
+    display: flex; align-items: flex-start; gap: 0.5rem;
+  }
+
+  .plan-features li:last-child { border-bottom: none; }
+
+  .check { color: #16a34a; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .cross { color: var(--gray); flex-shrink: 0; margin-top: 1px; }
+
+  .plan-cta {
+    width: 100%; padding: 0.85rem;
+    border-radius: 8px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    border: 2px solid var(--blue); color: var(--blue); background: transparent;
+  }
+
+  .plan-cta.featured-cta { background: var(--blue); color: var(--white); font-weight: 600; }
+  .plan-cta:hover { background: var(--blue); color: var(--white); }
+
+  .payment-notice {
+    background: var(--blue-light);
+    border-left: 4px solid var(--blue);
+    border-radius: 8px; padding: 1.25rem 1.5rem;
+    margin-top: 3rem;
+    font-size: 0.9rem; line-height: 1.7; color: var(--blue);
+  }
+
+  .payment-notice strong { display: block; font-size: 1rem; margin-bottom: 0.3rem; }
+
+  /* ─── REVIEWS ─── */
+  .reviews-bg { background: var(--blue); }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+
+  .review-card {
+    background: rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: all 0.3s ease;
+    animation: scaleInUp 0.6s ease both;
+    backdrop-filter: blur(10px);
+  }
+
+  .review-card:nth-child(1) { animation-delay: 0.1s; }
+  .review-card:nth-child(2) { animation-delay: 0.2s; }
+  .review-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .review-card:hover { 
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-4px);
+  }
+
+  .stars { color: #f59e0b; font-size: 1rem; margin-bottom: 0.75rem; letter-spacing: 2px; }
+
+  .review-text {
+    font-size: 0.95rem; color: rgba(255,255,255,0.85);
+    line-height: 1.7; font-style: italic; margin-bottom: 1.25rem;
+  }
+
+  .review-author { display: flex; align-items: center; gap: 0.75rem; }
+
+  .review-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--red); display: flex; align-items: center;
+    justify-content: center; font-weight: 700; color: var(--white); font-size: 0.85rem;
+  }
+
+  .review-name { font-weight: 600; color: var(--white); font-size: 0.9rem; }
+  .review-plan { font-size: 0.8rem; color: rgba(255,255,255,0.55); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #0d1f3c; color: rgba(255,255,255,0.6);
+    text-align: center; padding: 2rem; font-size: 0.85rem;
+  }
+
+  footer strong { color: var(--white); }
+
+  /* ─── MODALS / AUTH ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 2000; display: none; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white); border-radius: 16px;
+    width: 100%; max-width: 440px;
+    max-height: 90vh; overflow-y: auto;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease;
+  }
+
+  .modal h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 1px; color: var(--blue);
+    margin-bottom: 0.25rem;
+  }
+
+  .modal p.modal-sub { font-size: 0.9rem; color: var(--gray); margin-bottom: 1.75rem; }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-group label {
+    display: block; font-size: 0.85rem; font-weight: 500;
+    color: var(--text); margin-bottom: 0.35rem;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.75rem 1rem;
+    border: 1.5px solid var(--gray-light);
+    border-radius: 8px; font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.3s; color: var(--text);
+    background: var(--white);
+  }
+
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; 
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(34,85,164,0.1);
+    background: var(--white);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 90px; }
+
+  .form-btn {
+    width: 100%; padding: 0.9rem;
+    background: var(--blue); color: var(--white);
+    border: none; border-radius: 8px;
+    font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+    font-family: 'DM Sans', sans-serif; margin-top: 0.5rem;
+  }
+
+  .form-btn:hover { background: var(--blue-mid); }
+
+  .form-btn.red { background: var(--red); }
+  .form-btn.red:hover { background: #a93226; }
+
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; font-size: 1.5rem;
+    cursor: pointer; color: var(--gray);
+  }
+
+  .modal-switch { text-align: center; margin-top: 1.25rem; font-size: 0.9rem; color: var(--gray); }
+  .modal-switch a { color: var(--blue); cursor: pointer; font-weight: 500; text-decoration: none; }
+
+  .user-type-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    flex: 1; padding: 0.6rem;
+    border: 1.5px solid var(--gray-light);
+    border-radius: 8px; background: none;
+    font-size: 0.85rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    color: var(--gray); transition: all 0.2s;
+  }
+
+  .tab-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+
+  /* ─── DASHBOARD ─── */
+  .dashboard { min-height: 100vh; padding-top: 64px; background: var(--off-white); }
+
+  .dash-header {
+    background: var(--white); border-bottom: 1px solid var(--gray-light);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .dash-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; color: var(--blue); letter-spacing: 1px;
+  }
+
+  .dash-user {
+    display: flex; align-items: center; gap: 1rem;
+  }
+
+  .dash-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--blue); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem;
+  }
+
+  .dash-tabs {
+    display: flex; gap: 0; background: var(--white);
+    border-bottom: 1px solid var(--gray-light);
+    overflow-x: auto; padding: 0 2rem;
+  }
+
+  .dash-tab {
+    padding: 1rem 1.5rem; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; border-bottom: 3px solid transparent;
+    color: var(--gray); white-space: nowrap;
+    transition: all 0.2s; background: none; border-top: none;
+    border-left: none; border-right: none; font-family: 'DM Sans', sans-serif;
+  }
+
+  .dash-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  .dash-content { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .dash-panel { display: none; }
+  .dash-panel.active { display: block; }
+
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--gray-light); padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card h3 {
+    font-size: 1rem; font-weight: 600; color: var(--blue);
+    margin-bottom: 1rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--gray-light);
+    padding: 1.25rem; text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; color: var(--blue); letter-spacing: 1px; line-height: 1;
+  }
+
+  .stat-label { font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem; }
+
+  .status-badge {
+    display: inline-block; padding: 0.25rem 0.75rem;
+    border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  }
+
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-active { background: #d1fae5; color: #065f46; }
+  .status-done { background: var(--blue-light); color: var(--blue); }
+  .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+  .requests-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+  .requests-table th {
+    text-align: left; padding: 0.75rem; font-size: 0.8rem;
+    font-weight: 600; color: var(--gray); text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 2px solid var(--gray-light);
+  }
+
+  .requests-table td {
+    padding: 0.9rem 0.75rem; border-bottom: 1px solid var(--gray-light);
+    vertical-align: top;
+  }
+
+  .requests-table tr:last-child td { border-bottom: none; }
+
+  .requests-table tr:hover td { background: var(--off-white); }
+
+  .action-btn {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .action-btn.blue { background: var(--blue); color: var(--white); }
+  .action-btn.blue:hover { background: var(--blue-mid); }
+  .action-btn.red { background: var(--red); color: var(--white); }
+  .action-btn.red:hover { background: #a93226; }
+  .action-btn.green { background: #16a34a; color: var(--white); }
+  .action-btn.outline {
+    background: none; border: 1.5px solid var(--gray-light); color: var(--gray);
+  }
+  .action-btn.outline:hover { border-color: var(--blue); color: var(--blue); }
+
+  .alert {
+    padding: 1rem 1.25rem; border-radius: 8px;
+    font-size: 0.9rem; margin-bottom: 1rem;
+  }
+
+  .alert.info { background: var(--blue-light); color: var(--blue); }
+  .alert.success { background: #d1fae5; color: #065f46; }
+  .alert.warn { background: #fef3c7; color: #92400e; }
+
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .review-form-stars { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+  .star-btn {
+    font-size: 1.8rem; background: none; border: none;
+    cursor: pointer; color: var(--gray-light); transition: color 0.1s;
+    line-height: 1;
+  }
+
+  .star-btn.lit { color: #f59e0b; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeUp 0.6s ease both; }
+
+  /* ─── CAR SVG SILHOUETTES ─── */
+  .hero-cars-svg {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    width: 100%; pointer-events: none; z-index: 1;
+    filter: drop-shadow(0 10px 30px rgba(192,57,43,0.15)) drop-shadow(0 0 20px rgba(255,255,255,0.05));
+  }
+
+  .float {
+    animation: float 8s ease-in-out infinite;
+    filter: drop-shadow(0 3px 8px rgba(192,57,43,0.15));
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  .float:hover {
+    animation: float 8s ease-in-out infinite;
+    filter: brightness(1.15) drop-shadow(0 4px 12px rgba(192,57,43,0.25));
+  }
+
+  .float-delayed { animation: float 8s 2.5s ease-in-out infinite; }
+  .float-delayed2 { animation: float 8s 4.5s ease-in-out infinite; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); opacity: 1; }
+    50% { transform: translateY(-5px); opacity: 0.95; }
+  }
+
+  @keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleInUp {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ─── PULSE DOT ─── */
+  .pulse-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #22c55e; display: inline-block;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+
+  /* ─── MISC ─── */
+  hr.divider { border: none; border-top: 1px solid var(--gray-light); margin: 1.5rem 0; }
+
+  .text-center { text-align: center; }
+
+  .reviews-section-title { color: var(--white) !important; }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem; color: var(--gray);
+  }
+
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.95rem; }
+
+  .tag {
+    display: inline-block; padding: 0.25rem 0.6rem;
+    background: var(--blue-light); color: var(--blue);
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+    margin-right: 0.3rem; margin-bottom: 0.3rem;
+  }
+
+  .tag.red { background: var(--red-light); color: var(--red); }
+
+  .notes-box {
+    background: var(--off-white); border-radius: 8px;
+    padding: 1rem; font-size: 0.9rem; color: var(--gray);
+    border: 1px solid var(--gray-light); margin-top: 0.5rem;
+  }
+
+  /* scroll fix for sections */
+  html { scroll-behavior: smooth; }
+
+  .section-divider {
+    width: 60px; height: 4px; background: var(--red);
+    border-radius: 2px; margin: 1rem 0 1.5rem;
+    animation: slideInLeft 0.6s ease;
+  }
+
+  /* Scroll indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: bounce 2s infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 2;
+  }
+
+  .scroll-indicator svg {
+    width: 24px;
+    height: 24px;
+    margin-top: 8px;
+    stroke: rgba(255,255,255,0.6);
+    stroke-width: 2;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+  }
+
+  /* ─── MOBILE RESPONSIVENESS ─── */
+  @media (max-width: 768px) {
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 0.75rem; font-size: 0.8rem; }
+    .nav-btn { padding: 0.4rem 1rem; font-size: 0.8rem; }
+    .hero { padding: 80px 1rem 2rem; }
+    .hero h1 { margin-bottom: 1rem; }
+    section { padding: 3rem 1rem; }
+    .container { padding: 0; }
+    .plans-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .reviews-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .dash-tabs { overflow-x: auto; padding: 0 1rem; }
+    .step { padding: 1.5rem 1rem; }
+  }
+
+  @media (max-width: 480px) {
+    .nav-logo { font-size: 1.4rem; letter-spacing: 1px; }
+    .hero h1 { font-size: clamp(2rem, 6vw, 3rem); }
+    .hero p { font-size: 0.95rem; }
+    .hero-btns { flex-direction: column; }
+    .btn-primary, .btn-secondary { width: 100%; }
+    section { padding: 2rem 1rem; }
+  }
+
+  /* ─── CONTACT SECTION ─── */
+  .contact-section { background: linear-gradient(160deg, #0d1f3c 0%, #1a3a6b 50%, #0d1f3c 100%); color: var(--white); position: relative; overflow: hidden; }
+
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+
+  .contact-info { animation: slideInLeft 0.8s ease; }
+
+  .contact-form { animation: slideInRight 0.8s ease; }
+
+  .contact-info h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--white); font-weight: 600; }
+
+  .contact-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+
+  .contact-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.2rem; }
+
+  .contact-item p { font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.85); }
+
+  .contact-item strong { color: var(--white); display: block; margin-bottom: 0.2rem; }
+
+  .contact-form h3 { font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--white); font-weight: 600; }
+
+  .contact-form .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .contact-form .form-group label { color: rgba(255,255,255,0.9); }
+
+  .contact-form .form-group input,
+  .contact-form .form-group textarea {
+    background: rgba(255,255,255,0.95);
+    border: none;
+    color: var(--text);
+  }
+
+  .contact-form .form-group input:focus,
+  .contact-form .form-group textarea:focus {
+    outline: 2px solid var(--red);
+    outline-offset: -2px;
+  }
+
+  .submit-btn {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+  }
+
+  .submit-btn:hover {
+    background: #a93226;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 768px) {
+    .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .contact-info, .contact-form { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav id="mainNav">
+  <div class="nav-logo" onclick="showPage('landing')">Drive<span>Sure</span></div>
+  <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileNav()">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a onclick="scrollToSection('how')">How It Works</a>
+    <a onclick="scrollToSection('plans')">Plans</a>
+    <a onclick="scrollToSection('reviews')">Reviews</a>
+    <a onclick="scrollToSection('contact')">Contact</a>
+    
+    <!-- Dashboard link (shown only for logged-in customers) -->
+    <a id="dashboardLink" style="display:none; color:rgba(255,255,255,0.8); text-decoration:none; font-size:0.9rem; font-weight:500; cursor:pointer; transition:color 0.2s;" onclick="showPage('customer')">Dashboard</a>
+    
+    <!-- Sign In button (shown only when not logged in) -->
+    <button class="nav-btn" id="signInBtn" onclick="openModal('loginModal')">Sign In</button>
+    
+    <!-- Sign Out button (shown only for logged-in customers) -->
+    <button class="nav-btn" id="signOutBtn" style="display:none; background:#f59e0b;" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- ─── LANDING PAGE ─── -->
+<!-- PAYMENT PAGE -->
+  <div class="page payment-page" id="page-payment">
+    <nav id="mainNav" style="background:rgba(26,58,107,0.97);">
+      <div class="nav-logo" onclick="showPage('landing')">Drive<span>Sure</span></div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="nav-btn" onclick="showPage('landing')">Back</button>
+      </div>
+    </nav>
+
+    <div class="payment-container">
+      <div class="payment-header">
+        <h1>Complete Your Payment</h1>
+        <p style="font-size:1rem;color:rgba(255,255,255,0.7);">Transfer funds to our account below, then send proof of payment via WhatsApp</p>
+      </div>
+
+      <div class="payment-info-box">
+        <div class="payment-detail">
+          <label>Bank Name</label>
+          <div class="payment-detail-value" id="bankName">FNB</div>
+        </div>
+        <div class="payment-detail">
+          <label>Account Name</label>
+          <div class="payment-detail-value" id="accountName">Drive Sure (Pty) Ltd</div>
+        </div>
+        <div class="payment-detail">
+          <label>Account Number</label>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <div class="payment-detail-value" style="flex:1;margin:0;" id="accountNumber">62123456789</div>
+            <button class="copy-btn" onclick="copyToClipboard('accountNumber')">📋 Copy</button>
+          </div>
+        </div>
+        <div class="payment-detail">
+          <label>Branch Code</label>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <div class="payment-detail-value" style="flex:1;margin:0;" id="branchCode">250655</div>
+            <button class="copy-btn" onclick="copyToClipboard('branchCode')">📋 Copy</button>
+          </div>
+        </div>
+        <div class="payment-detail">
+          <label>Reference / Description</label>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <div class="payment-detail-value" style="flex:1;margin:0;" id="reference">Your Email Address</div>
+            <button class="copy-btn" onclick="copyToClipboard('reference')">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-steps">
+        <h3>📋 How to Complete Payment:</h3>
+        <ol>
+          <li>Transfer the required amount (R300, R1,000+, or R1,500+) to the account details above</li>
+          <li>Use your email address as the reference/description</li>
+          <li>Take a screenshot of the payment confirmation</li>
+          <li>Send the proof to our WhatsApp number using the button below</li>
+          <li>We'll verify and activate your request within 24 hours</li>
+        </ol>
+      </div>
+
+      <button class="whatsapp-btn" onclick="submitPaymentAndRedirect()">
+        💬 Payment Sent - Proceed to Service Form
+      </button>
+
+      <button class="back-btn" onclick="showPage('landing')">← Back to Home</button>
+
+      <div class="payment-note">
+        ⚠️ <strong>Important:</strong> Payment must be received before we begin your service. Your request cannot be processed until we confirm payment. Keep your transaction receipt for your records.
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICE REQUEST PAGE -->
+  <div class="page" id="page-service-request">
+    <nav id="mainNav" style="background:rgba(26,58,107,0.97);">
+      <div class="nav-logo">Drive<span>Sure</span></div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="nav-btn" onclick="showPage('landing')">Back</button>
+      </div>
+    </nav>
+
+    <div style="max-width:800px;margin:0 auto;padding:3rem 2rem;min-height:100vh;background:var(--off-white);">
+      <div style="margin-bottom:2rem;text-align:center;">
+        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--blue);letter-spacing:1px;margin-bottom:0.5rem;">Tell Us What You Need</h1>
+        <p style="color:var(--gray);font-size:1rem;">Complete your service request and we'll get started!</p>
+      </div>
+
+      <div style="background:var(--white);border-radius:12px;border:1px solid var(--gray-light);padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <div class="alert info" style="margin-bottom:1.5rem;">Payment verified! Now tell us what car you're looking for.</div>
+        
+        <div class="two-col">
+          <div class="form-group">
+            <label>Car Type *</label>
+            <select id="reqCarType" required>
+              <option value="">Select type</option>
+              <option>Sedan</option>
+              <option>Hatchback</option>
+              <option>SUV / Crossover</option>
+              <option>Bakkie / Pickup</option>
+              <option>Station Wagon</option>
+              <option>Coupe</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Preferred Make(s)</label>
+            <input type="text" id="reqMake" placeholder="e.g. Toyota, VW, Ford">
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="form-group">
+            <label>Budget Minimum (R) *</label>
+            <input type="number" id="reqBudgetMin" placeholder="e.g. 50000" required>
+          </div>
+          <div class="form-group">
+            <label>Budget Maximum (R) *</label>
+            <input type="number" id="reqBudgetMax" placeholder="e.g. 150000" required>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="form-group">
+            <label>Preferred Area in Cape Town *</label>
+            <input type="text" id="reqArea" placeholder="e.g. Bellville, Claremont, Strand" required>
+          </div>
+          <div class="form-group">
+            <label>Year Range (optional)</label>
+            <input type="text" id="reqYear" placeholder="e.g. 2015 - 2020">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Viewing Preference (Standard & Platinum) *</label>
+          <select id="reqViewing" required>
+            <option>Mechanic only</option>
+            <option>I join the viewing</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Additional Notes / Preferences</label>
+          <textarea id="reqNotes" placeholder="Colour preference, mileage requirements, must-haves, anything else..."></textarea>
+        </div>
+
+        <button class="form-btn" onclick="submitServiceRequest()" style="background:var(--blue);">
+          ✅ Complete Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page active" id="page-landing">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-stripes"></div>
+
+    <!-- Animated car silhouettes -->
+    <svg class="hero-cars-svg" viewBox="0 0 1400 220" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sedan silhouette 1 -->
+      <g opacity="0.08" fill="white" transform="translate(60,60)">
+        <ellipse cx="70" cy="130" rx="35" ry="10"/>
+        <ellipse cx="220" cy="130" rx="35" ry="10"/>
+        <path d="M20 120 Q25 85 80 65 Q110 50 145 50 Q185 50 215 65 Q255 90 265 120 Z"/>
+        <path d="M10 120 L285 120 L285 130 L10 130 Z"/>
+        <circle cx="70" cy="128" r="22" fill="white"/>
+        <circle cx="70" cy="128" r="12" fill="#0d1f3c"/>
+        <circle cx="220" cy="128" r="22" fill="white"/>
+        <circle cx="220" cy="128" r="12" fill="#0d1f3c"/>
+      </g>
+
+      <!-- SUV silhouette -->
+      <g opacity="0.07" fill="white" transform="translate(520,30)">
+        <ellipse cx="80" cy="145" rx="40" ry="11"/>
+        <ellipse cx="260" cy="145" rx="40" ry="11"/>
+        <rect x="15" y="60" width="280" height="75" rx="8"/>
+        <path d="M30 60 Q35 20 100 20 L210 20 Q260 20 290 60 Z"/>
+        <rect x="5" y="130" width="305" height="20" rx="4"/>
+        <circle cx="80" cy="143" r="25" fill="white"/>
+        <circle cx="80" cy="143" r="13" fill="#0d1f3c"/>
+        <circle cx="260" cy="143" r="25" fill="white"/>
+        <circle cx="260" cy="143" r="13" fill="#0d1f3c"/>
+      </g>
+
+      <!-- Bakkie silhouette -->
+      <g opacity="0.09" fill="white" transform="translate(900,40)">
+        <ellipse cx="80" cy="145" rx="40" ry="11"/>
+        <ellipse cx="280" cy="145" rx="40" ry="11"/>
+        <rect x="5" y="90" width="350" height="55" rx="5"/>
+        <path d="M20 90 Q25 40 90 35 L195 35 Q220 35 230 90 Z"/>
+        <rect x="5" y="135" width="350" height="18" rx="4"/>
+        <circle cx="80" cy="143" r="25" fill="white"/>
+        <circle cx="80" cy="143" r="13" fill="#0d1f3c"/>
+        <circle cx="280" cy="143" r="25" fill="white"/>
+        <circle cx="280" cy="143" r="13" fill="#0d1f3c"/>
+      </g>
+    </svg>
+
+    <div class="hero-content">
+      <div class="hero-badge">✓ Trusted. Vetted. Delivered.</div>
+      <h1>Your Perfect Vehicle<br><span>Awaits</span></h1>
+      <p>We find, negotiate, and inspect the car you've always wanted. From search to steering wheel—we've got you covered.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="openModal('loginModal'); switchLoginTab('customer')">Get Started</button>
+        <button class="btn-secondary" onclick="scrollToSection('plans')">View Plans</button>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2.5V19M12 19L5 12M12 19L19 12"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-bg" id="how">
+    <div class="container">
+      <div class="section-tag">The Process</div>
+      <h2 class="section-title">How It Works</h2>
+      <div class="section-divider"></div>
+      <p class="section-sub">Simple, transparent, and stress-free. We handle the legwork so you drive away happy.</p>
+
+      <div class="steps">
+        <div class="step fade-in">
+          <div class="step-num">01</div>
+          <div class="step-icon">📋</div>
+          <h3>Tell Us What You Need</h3>
+          <p>Fill in your preferences — car type, budget, and area. Cars and bakkies welcome. No trucks.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-num">02</div>
+          <div class="step-icon">💳</div>
+          <h3>Choose & Pay For Your Plan</h3>
+          <p>Select Basic, Standard, or Platinum. Pay upfront before we begin. This shows commitment and covers our time.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-num">03</div>
+          <div class="step-icon">🔍</div>
+          <h3>We Source & Negotiate</h3>
+          <p>We search Cape Town listings, contact sellers, and negotiate the best possible price on your behalf.</p>
+        </div>
+        <div class="step fade-in">
+          <div class="step-num">04</div>
+          <div class="step-icon">🚗</div>
+          <h3>View & Evaluate</h3>
+          <p>Depending on your plan, we go out with a qualified mechanic or with you to inspect and evaluate the car thoroughly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Plans -->
+  <section id="plans">
+    <div class="container">
+      <div class="section-tag">Pricing</div>
+      <h2 class="section-title">Our Service Plans</h2>
+      <div class="section-divider"></div>
+      <p class="section-sub">All plans are for cars and bakkies only. Pricing is transparent — no hidden extras.</p>
+
+      <div class="plans-grid">
+        <!-- Basic -->
+        <div class="plan-card">
+          <div class="plan-name">Basic</div>
+          <div class="plan-price">R300 <span>flat fee</span></div>
+          <div class="plan-note">Pay before we begin</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Source cars matching your brief</li>
+            <li><span class="check">✓</span> Expert advice on what to look for</li>
+            <li><span class="check">✓</span> Price negotiation with seller</li>
+            <li><span class="check">✓</span> Cape Town area only</li>
+            <li><span class="cross">–</span> Mechanic inspection</li>
+            <li><span class="cross">–</span> Physical car viewing</li>
+            <li><span class="cross">–</span> Full diagnostics</li>
+          </ul>
+          <button class="plan-cta" onclick="selectPlan('Basic – R300')">Get Started</button>
+        </div>
+
+        <!-- Standard -->
+        <div class="plan-card featured">
+          <div class="plan-badge">✨ Most Popular</div>
+          <div class="plan-name">Standard</div>
+          <div class="plan-price">R1,000 <span>min. fee</span></div>
+          <div class="plan-note">From R1,000 based on location &amp; time</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Everything in Basic</li>
+            <li><span class="check">✓</span> Qualified mechanic accompanies</li>
+            <li><span class="check">✓</span> Full car inspection on-site</li>
+            <li><span class="check">✓</span> Our professional opinion on the car</li>
+            <li><span class="check">✓</span> Test drive evaluation</li>
+            <li><span class="cross">–</span> Full electronic diagnostics</li>
+          </ul>
+          <button class="plan-cta featured-cta" onclick="selectPlan('Standard – from R1,000')">Get Started</button>
+        </div>
+
+        <!-- Platinum -->
+        <div class="plan-card">
+          <div class="plan-name">Platinum</div>
+          <div class="plan-price">R1,500 <span>min. fee</span></div>
+          <div class="plan-note">From R1,500 based on location &amp; time</div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Everything in Standard</li>
+            <li><span class="check">✓</span> Full electronic diagnostics</li>
+            <li><span class="check">✓</span> Comprehensive diagnostic report</li>
+            <li><span class="check">✓</span> Complete peace of mind</li>
+            <li><span class="check">✓</span> Option: you join the viewing</li>
+            <li><span class="check">✓</span> Priority handling</li>
+          </ul>
+          <button class="plan-cta" onclick="selectPlan('Platinum – from R1,500')">Get Started</button>
+        </div>
+      </div>
+
+      <div class="payment-notice">
+        <strong>⚠️ Payment is required upfront before any service begins.</strong>
+        Our pricing reflects the time, expertise, fuel, and effort we put into finding and evaluating your vehicle in Cape Town. Standard and Platinum pricing starts from the listed amount and may vary based on the location of the car and the total time required. We appreciate your understanding — this is what allows us to give every client our full attention and commitment.
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="reviews-bg" id="reviews">
+    <div class="container">
+      <div class="section-tag" style="background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.9);">What Clients Say</div>
+      <h2 class="section-title reviews-section-title">Real Reviews</h2>
+      <div class="section-divider"></div>
+
+      <div class="reviews-grid" id="publicReviews">
+        <!-- Populated by JS -->
+      </div>
+
+      <div style="text-align:center; margin-top:2.5rem;">
+        <button class="btn-secondary" onclick="handleReviewButton()">Leave a Review</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section" id="contact">
+    <div class="container" style="max-width:1200px;">
+      <div style="text-align:center;margin-bottom:3rem;">
+        <div class="section-tag" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);display:inline-block;">Get In Touch</div>
+        <h2 class="section-title" style="color:var(--white);margin-top:1rem;">Let's Talk</h2>
+        <div class="section-divider" style="margin-left:auto;margin-right:auto;"></div>
+        <p style="color:rgba(255,255,255,0.8);font-size:1.05rem;max-width:600px;margin:0 auto;">Have questions about our service or ready to find your perfect vehicle? We're here to help.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div>
+              <strong>Phone</strong>
+              <p>Call us anytime during business hours. Quick responses, genuine help.</p>
+              <p style="font-weight:600;color:var(--red);margin-top:0.3rem;"><a href="tel:+27839958822" style="color:inherit;text-decoration:none;">0839958822</a></p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">✉️</div>
+            <div>
+              <strong>Email</strong>
+              <p>Send us an email and we'll respond within 24 hours.</p>
+              <p style="font-weight:600;color:var(--red);margin-top:0.3rem;">drivesure13@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div>
+              <strong>Location</strong>
+              <p>Based in Cape Town, serving the city and surrounding areas.</p>
+              <p style="font-weight:600;color:var(--red);margin-top:0.3rem;">Cape Town, South Africa</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon">⏰</div>
+            <div>
+              <strong>Hours</strong>
+              <p>Monday – Friday: 8am – 6pm<br>Saturday: 9am – 4pm<br>Sunday: Closed</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form">
+          <h3>Quick Message</h3>
+          <form id="contactFormElement" onsubmit="handleContactForm(event)">
+            <div class="form-group">
+              <label>Your Name</label>
+              <input type="text" id="contactName" placeholder="Jane Smith" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="contactEmail" placeholder="jane@example.com" required>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" id="contactSubject" placeholder="How can we help?" required>
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea id="contactMessage" placeholder="Tell us what's on your mind..." rows="5" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p><strong>Drive Sure</strong> — Your Trusted Vehicle Sourcing Partner</p>
+    <p style="margin-top:0.5rem;">Cars &amp; bakkies only. No trucks. Payment required upfront.</p>
+    <p style="margin-top:0.5rem; font-size:0.8rem;">Contact Support via our website · &copy; 2025 Drive Sure</p>
+  </footer>
+
+</div>
+<!-- end landing -->
+
+
+<!-- ─── CUSTOMER DASHBOARD ─── -->
+<div class="page" id="page-customer">
+  <nav>
+    <div class="nav-logo" onclick="null">Drive<span>Sure</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span style="color:rgba(255,255,255,0.7);font-size:0.85rem;" id="custGreeting">Welcome</span>
+      <button class="nav-btn" style="background:#25D366;" onclick="showPage('landing')">← Back to Website</button>
+      <button class="nav-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dash-header">
+      <h2>My Dashboard</h2>
+      <div class="dash-user">
+        <span class="pulse-dot"></span>
+        <span style="font-size:0.85rem;color:var(--gray);">Customer Portal</span>
+        <div class="dash-avatar" id="custAvatar">CU</div>
+      </div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('customer','request')">Submit Request</button>
+      <button class="dash-tab" onclick="switchDashTab('customer','myrequests')">My Requests</button>
+      <button class="dash-tab" onclick="switchDashTab('customer','review')">Leave a Review</button>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- Submit Request -->
+      <div class="dash-panel active" id="cust-panel-request">
+        <div class="card">
+          <h3>New Car Search Request</h3>
+          <div class="alert info">Payment is required before your request is actioned. Our team will contact you with payment details once you submit.</div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Car Type</label>
+              <select id="reqCarType">
+                <option value="">Select type</option>
+                <option>Sedan</option>
+                <option>Hatchback</option>
+                <option>SUV / Crossover</option>
+                <option>Bakkie / Pickup</option>
+                <option>Station Wagon</option>
+                <option>Coupe</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Preferred Make(s)</label>
+              <input type="text" id="reqMake" placeholder="e.g. Toyota, VW, Ford">
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Budget Minimum (R)</label>
+              <input type="number" id="reqBudgetMin" placeholder="e.g. 50000">
+            </div>
+            <div class="form-group">
+              <label>Budget Maximum (R)</label>
+              <input type="number" id="reqBudgetMax" placeholder="e.g. 150000">
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Preferred Area in Cape Town</label>
+              <input type="text" id="reqArea" placeholder="e.g. Bellville, Claremont, Strand">
+            </div>
+            <div class="form-group">
+              <label>Year Range (optional)</label>
+              <input type="text" id="reqYear" placeholder="e.g. 2015 - 2020">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Service Plan</label>
+            <select id="reqPlan">
+              <option value="">Select a plan</option>
+              <option value="Basic – R300">Basic – R300 (Source, advise &amp; negotiate)</option>
+              <option value="Standard – from R1,000">Standard – from R1,000 (+ Mechanic inspection &amp; test drive)</option>
+              <option value="Platinum – from R1,500">Platinum – from R1,500 (+ Full diagnostics)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Viewing Preference (Standard &amp; Platinum)</label>
+            <select id="reqViewing">
+              <option value="Mechanic only">Mechanic + our agent go to view (I don't come)</option>
+              <option value="I join the viewing">I join the viewing with your agent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Additional Notes / Preferences</label>
+            <textarea id="reqNotes" placeholder="Colour preference, mileage requirements, must-haves, anything else..."></textarea>
+          </div>
+          <button class="form-btn" onclick="submitRequest()">Submit Request</button>
+        </div>
+      </div>
+
+      <!-- My Requests -->
+      <div class="dash-panel" id="cust-panel-myrequests">
+        <div class="card">
+          <h3>My Requests</h3>
+          <div style="margin-bottom:1rem;">
+            <p style="color:var(--gray);font-size:0.9rem;">Your submitted car search requests will appear here. Once you submit a request, our agents will contact you with updates.</p>
+          </div>
+          <div id="custRequestsList"></div>
+        </div>
+      </div>
+
+      <!-- Review -->
+      <div class="dash-panel" id="cust-panel-review">
+        <div class="card">
+          <h3>Leave a Review</h3>
+          <div class="alert info">Please only leave a review if you have completed a service with us. Thank you!</div>
+          <div class="form-group">
+            <label>Your Rating</label>
+            <div class="review-form-stars" id="starRating">
+              <button class="star-btn" onclick="setStars(1)">★</button>
+              <button class="star-btn" onclick="setStars(2)">★</button>
+              <button class="star-btn" onclick="setStars(3)">★</button>
+              <button class="star-btn" onclick="setStars(4)">★</button>
+              <button class="star-btn" onclick="setStars(5)">★</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Plan Used</label>
+            <select id="reviewPlan">
+              <option>Basic</option>
+              <option>Standard</option>
+              <option>Platinum</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Your Review</label>
+            <textarea id="reviewText" placeholder="Tell others about your experience..."></textarea>
+          </div>
+          <button class="form-btn" onclick="submitReview()">Submit Review</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── AGENT DASHBOARD (Dad + Mechanic) ─── -->
+<div class="page" id="page-agent">
+  <nav>
+    <div class="nav-logo">Car<span>Find</span> CT</div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span style="color:rgba(255,255,255,0.7);font-size:0.85rem;" id="agentGreeting">Agent</span>
+      <button class="nav-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dash-header">
+      <h2>Agent Dashboard</h2>
+      <div class="dash-user">
+        <span class="pulse-dot"></span>
+        <span style="font-size:0.85rem;color:var(--gray);">Agent Portal</span>
+        <div class="dash-avatar" style="background:var(--red);" id="agentAvatar">AG</div>
+      </div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('agent','overview')">Overview</button>
+      <button class="dash-tab" onclick="switchDashTab('agent','requests')">All Requests</button>
+      <button class="dash-tab" onclick="switchDashTab('agent','schedule')">Schedule</button>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- Overview -->
+      <div class="dash-panel active" id="agent-panel-overview">
+        <div class="stats-row" id="agentStats"></div>
+        <div class="card">
+          <h3>Pending Action Required</h3>
+          <div id="agentPendingList"></div>
+        </div>
+      </div>
+
+      <!-- All Requests -->
+      <div class="dash-panel" id="agent-panel-requests">
+        <div class="card">
+          <h3>All Customer Requests</h3>
+          <div id="agentAllRequests"></div>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="dash-panel" id="agent-panel-schedule">
+        <div class="card">
+          <h3>Upcoming Viewings & Jobs</h3>
+          <div id="agentSchedule"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── ADMIN DASHBOARD ─── -->
+<div class="page" id="page-admin">
+  <nav>
+    <div class="nav-logo">Car<span>Find</span> CT</div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span style="color:rgba(255,255,255,0.7);font-size:0.85rem;">Admin</span>
+      <button class="nav-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dash-header">
+      <h2>Admin Control Panel</h2>
+      <div class="dash-user">
+        <span class="pulse-dot"></span>
+        <span style="font-size:0.85rem;color:var(--gray);">Administrator</span>
+        <div class="dash-avatar" style="background:#7c3aed;">AD</div>
+      </div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('admin','overview')">Overview</button>
+      <button class="dash-tab" onclick="switchDashTab('admin','requests')">All Requests</button>
+      <button class="dash-tab" onclick="switchDashTab('admin','users')">Users</button>
+      <button class="dash-tab" onclick="switchDashTab('admin','reviews')">Reviews</button>
+      <button class="dash-tab" onclick="switchDashTab('admin','support')">Support</button>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- Overview -->
+      <div class="dash-panel active" id="admin-panel-overview">
+        <div class="stats-row" id="adminStats"></div>
+        <div class="card">
+          <h3>Recent Activity</h3>
+          <div id="adminActivity"></div>
+        </div>
+      </div>
+
+      <!-- All Requests -->
+      <div class="dash-panel" id="admin-panel-requests">
+        <div class="card">
+          <h3>All Service Requests</h3>
+          <div id="adminAllRequests"></div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="dash-panel" id="admin-panel-users">
+        <div class="card">
+          <h3>Registered Users</h3>
+          <div id="adminUsers"></div>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="dash-panel" id="admin-panel-reviews">
+        <div class="card">
+          <h3>All Reviews (Approve / Remove)</h3>
+          <div id="adminReviews"></div>
+        </div>
+      </div>
+
+      <!-- Support -->
+      <div class="dash-panel" id="admin-panel-support">
+        <div class="card">
+          <h3>Support Messages</h3>
+          <div id="adminSupport"></div>
+        </div>
+        <div class="card" style="margin-top:1.5rem;">
+          <h3>Broadcast Message to All Customers</h3>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="broadcastMsg" placeholder="Send a message to all customers..."></textarea>
+          </div>
+          <button class="form-btn red" onclick="sendBroadcast()">Send Broadcast</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── LOGIN MODAL ─── -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+    <h2>Welcome Back</h2>
+    <p class="modal-sub">Sign in or create a customer account</p>
+
+    <div class="user-type-tabs">
+      <button class="tab-btn active" id="tab-customer" onclick="switchLoginTab('customer')">Customer</button>
+      <button class="tab-btn" id="tab-agent" onclick="switchLoginTab('agent')">Agent / Mechanic</button>
+      <button class="tab-btn" id="tab-admin" onclick="switchLoginTab('admin')">Admin</button>
+    </div>
+
+    <!-- Customer Login / Register -->
+    <div id="login-customer">
+      <div id="login-form-customer">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="custEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="custPass" placeholder="••••••••">
+        </div>
+        <div id="loginError" style="color:var(--red);font-size:0.85rem;margin-bottom:0.5rem;display:none;"></div>
+        <button class="form-btn" onclick="loginCustomer()">Sign In</button>
+        <div class="modal-switch">New here? <a onclick="showRegister()">Create an account</a></div>
+      </div>
+
+      <div id="register-form-customer" style="display:none;">
+        <div class="two-col">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="regFirst" placeholder="Jane">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="regLast" placeholder="Smith">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="regEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="regPhone" placeholder="071 000 0000">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPass" placeholder="Choose a password">
+        </div>
+        <div id="registerError" style="color:var(--red);font-size:0.85rem;margin-bottom:0.5rem;display:none;"></div>
+        <button class="form-btn" onclick="registerCustomer()">Create Account</button>
+        <div class="modal-switch">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+      </div>
+    </div>
+
+    <!-- Agent Login -->
+    <div id="login-agent" style="display:none;">
+      <div class="alert warn" style="margin-bottom:1rem;">Agent &amp; Mechanic access is managed by the admin. Contact support if you need access.</div>
+      <div class="form-group">
+        <label>Agent Username</label>
+        <input type="text" id="agentUser" placeholder="agent username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="agentPass" placeholder="••••••••">
+      </div>
+      <div id="agentLoginError" style="color:var(--red);font-size:0.85rem;margin-bottom:0.5rem;display:none;"></div>
+      <button class="form-btn red" onclick="loginAgent()">Agent Sign In</button>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="login-admin" style="display:none;">
+      <div class="form-group">
+        <label>Admin Username</label>
+        <input type="text" id="adminUser" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label>Admin Password</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+      </div>
+      <div id="adminLoginError" style="color:var(--red);font-size:0.85rem;margin-bottom:0.5rem;display:none;"></div>
+      <button class="form-btn" style="background:#7c3aed;" onclick="loginAdmin()">Admin Sign In</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── REQUEST DETAIL MODAL ─── -->
+<div class="modal-overlay" id="requestDetailModal">
+  <div class="modal" style="position:relative; max-width:560px;">
+    <button class="modal-close" onclick="closeModal('requestDetailModal')">&times;</button>
+    <h2>Request Details</h2>
+    <div id="requestDetailContent"></div>
+  </div>
+</div>
+
+<!-- ─── SUPPORT MODAL ─── -->
+<div class="modal-overlay" id="supportModal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('supportModal')">&times;</button>
+    <h2>Contact Support</h2>
+    <p class="modal-sub">We'll get back to you as soon as possible</p>
+    <div class="form-group">
+      <label>Subject</label>
+      <input type="text" id="supportSubject" placeholder="What do you need help with?">
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea id="supportMessage" placeholder="Describe your issue..."></textarea>
+    </div>
+    <button class="form-btn" onclick="submitSupport()">Send Message</button>
+  </div>
+</div>
+
+
+<script>
+// ─────────────────────────────────────────────
+// API CONFIGURATION
+// ─────────────────────────────────────────────
+
+const API_URL = 'http://localhost:3001/api';
+
+const DB = {
+  paymentInfo: {
+    bankName: 'FNB',
+    accountName: 'Drive Sure (Pty) Ltd',
+    accountNumber: '62123456789',
+    branchCode: '250655',
+    reference: 'CONTACT_WHATSAPP',
+    whatsappNumber: '27839958822'
+  }
+};
+
+// API Helper Functions
+async function apiCall(endpoint, method = 'GET', data = null) {
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getToken()}`
+    }
+  };
+  if (data) options.body = JSON.stringify(data);
+  
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, options);
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || 'API Error');
+    }
+    return result;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
+
+function getToken() {
+  return localStorage.getItem('token') || '';
+}
+
+function setToken(token) {
+  if (token) localStorage.setItem('token', token);
+  else localStorage.removeItem('token');
+}
+
+let currentUser = null;
+let currentStars = 0;
+
+// Save user to state and token to localStorage
+function saveUser(user, token) {
+  currentUser = user;
+  setToken(token);
+  localStorage.setItem('driveSureUser', JSON.stringify(user));
+  console.log('✅ User saved:', user.email);
+}
+
+// Load user from localStorage on page load
+async function loadSavedUser() {
+  const saved = localStorage.getItem('driveSureUser');
+  const token = getToken();
+  
+  if (saved && token) {
+    try {
+      currentUser = JSON.parse(saved);
+      // Verify token is still valid
+      const result = await apiCall('/auth/verify', 'POST', { token });
+      if (result.valid) {
+        console.log('✅ User loaded and token verified:', currentUser.email);
+      } else {
+        throw new Error('Token invalid');
+      }
+    } catch (e) {
+      console.error('❌ Error loading user:', e);
+      currentUser = null;
+      localStorage.removeItem('driveSureUser');
+      setToken(null);
+    }
+  } else {
+    console.log('ℹ️ No saved session found');
+  }
+}
+
+// Toggle mobile hamburger menu
+function toggleMobileNav() {
+  const navLinks = document.getElementById('navLinks');
+  navLinks.classList.toggle('open');
+}
+
+// Close mobile nav when a link is clicked
+document.addEventListener('click', (e) => {
+  const nav = document.getElementById('mainNav');
+  if (nav && !nav.contains(e.target)) {
+    const navLinks = document.getElementById('navLinks');
+    if (navLinks) navLinks.classList.remove('open');
+  }
+});
+
+// Call on page load
+window.addEventListener('load', () => {
+  loadSavedUser();
+  renderPublicReviews();
+  updateNavBar();
+  
+  // Auto-route agents and admins to their dashboards only
+  if (currentUser) {
+    if (currentUser.role === 'agent' || currentUser.role === 'mechanic') {
+      loadAgentDash();
+      showPage('agent');
+    } else if (currentUser.role === 'admin') {
+      loadAdminDash();
+      showPage('admin');
+    }
+    // Customers stay on whatever page they were on (usually landing)
+  }
+});
+
+function handleReviewButton() {
+  if (!currentUser) {
+    openModal('loginModal');
+    switchLoginTab('customer');
+  } else {
+    // Check if user is a customer
+    if (currentUser.role === 'customer') {
+      loadCustomerDash();
+      showPage('customer');
+      switchDashTab('customer', 'review');
+    } else {
+      alert('Only customers can leave reviews.');
+    }
+  }
+}
+
+function handleContactForm(event) {
+  event.preventDefault();
+  const name = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const subject = document.getElementById('contactSubject').value.trim();
+  const message = document.getElementById('contactMessage').value.trim();
+  
+  // Save to database
+  DB.supportMessages.push({
+    name, email, subject, message,
+    date: new Date().toISOString().slice(0,10)
+  });
+  
+  // Open default email client
+  const mailtoLink = `mailto:drivesure13@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${name} (${email})\\n\\n${message}`)}`;
+  window.location.href = mailtoLink;
+  
+  // Reset form
+  document.getElementById('contactFormElement').reset();
+  
+  // Show success message
+  setTimeout(() => {
+    alert('✅ Message sent! Your email client has opened. If it didn\'t, please email us directly at drivesure13@gmail.com.');
+  }, 500);
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT & PLAN SELECTION
+// ─────────────────────────────────────────────
+
+function selectPlan(planName) {
+  if (!currentUser) {
+    // Store the selected plan and open login
+    sessionStorage.setItem('selectedPlan', planName);
+    openModal('loginModal');
+    switchLoginTab('customer');
+  } else {
+    // User is already logged in, go to payment page
+    showPaymentPage(planName);
+  }
+}
+
+function showPaymentPage(planName) {
+  sessionStorage.setItem('selectedPlan', planName);
+  // Set reference as current user's email
+  if (currentUser) {
+    document.getElementById('reference').textContent = currentUser.email || 'Your Email';
+  }
+  showPage('payment');
+}
+
+function copyToClipboard(elementId) {
+  const element = document.getElementById(elementId);
+  const text = element.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 2000);
+  });
+}
+
+function submitPaymentAndRedirect() {
+  // First send WhatsApp
+  const whatsappNumber = '27839958822';
+  const planName = sessionStorage.getItem('selectedPlan') || 'a plan';
+  const userEmail = currentUser ? currentUser.email : 'email@example.com';
+  const message = `Hi Drive Sure,\n\nI have transferred payment for ${planName} and my reference is ${userEmail}. I have attached proof of payment below.\n\nThank you!`;
+  
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+  
+  window.open(whatsappUrl, '_blank');
+  
+  // Then redirect to service request form
+  setTimeout(() => {
+    showPage('service-request');
+  }, 500);
+}
+
+function submitServiceRequest() {
+  const carType = document.getElementById('reqCarType').value;
+  const make = document.getElementById('reqMake').value.trim();
+  const budgetMin = document.getElementById('reqBudgetMin').value;
+  const budgetMax = document.getElementById('reqBudgetMax').value;
+  const area = document.getElementById('reqArea').value.trim();
+  const plan = sessionStorage.getItem('selectedPlan') || 'Plan not selected';
+
+  if (!carType || !budgetMin || !budgetMax || !area) {
+    alert('⚠️ Please fill in all required fields (indicated with *).');
+    return;
+  }
+
+  const newReq = {
+    id: 'req' + Date.now(),
+    userId: currentUser.id,
+    userName: currentUser.first + ' ' + currentUser.last,
+    userEmail: currentUser.email,
+    userPhone: currentUser.phone || '',
+    carType, make,
+    budgetMin: Number(budgetMin),
+    budgetMax: Number(budgetMax),
+    area,
+    yearRange: document.getElementById('reqYear').value,
+    plan,
+    viewing: document.getElementById('reqViewing').value,
+    notes: document.getElementById('reqNotes').value,
+    status: 'pending',
+    date: new Date().toISOString().slice(0,10),
+    agentNotes: '',
+    scheduleDate: ''
+  };
+
+  DB.requests.push(newReq);
+  
+  // Clear form
+  ['reqCarType','reqMake','reqBudgetMin','reqBudgetMax','reqArea','reqYear','reqNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  
+  // Show success and redirect
+  alert('✅ Your service request has been submitted successfully!\n\nOur team will review your request and contact you within 24 hours at ' + currentUser.email + '.\n\nThank you for choosing Drive Sure!');
+  
+  // Go to customer dashboard
+  loadCustomerDash();
+  showPage('customer');
+  sessionStorage.removeItem('selectedPlan');
+}
+
+// Handle after login, redirect to payment if plan was selected
+function handlePostLoginRedirect() {
+  const selectedPlan = sessionStorage.getItem('selectedPlan');
+  if (selectedPlan && currentUser) {
+    closeModal('loginModal');
+    showPaymentPage(selectedPlan);
+    sessionStorage.removeItem('selectedPlan');
+  }
+}
+
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  
+  // Redirect agents/admins to their dashboards if trying to view landing
+  if (id === 'landing' && currentUser && currentUser.role !== 'customer') {
+    if (currentUser.role === 'agent' || currentUser.role === 'mechanic') {
+      loadAgentDash();
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-agent').classList.add('active');
+      return;
+    } else if (currentUser.role === 'admin') {
+      loadAdminDash();
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-admin').classList.add('active');
+      return;
+    }
+  }
+}
+
+// Update nav based on login state
+function updateNavBar() {
+  const signInBtn = document.getElementById('signInBtn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const dashboardLink = document.getElementById('dashboardLink');
+  
+  if (currentUser && currentUser.role === 'customer') {
+    signInBtn.style.display = 'none';
+    signOutBtn.style.display = 'block';
+    dashboardLink.style.display = 'block';
+  } else {
+    signInBtn.style.display = 'block';
+    signOutBtn.style.display = 'none';
+    dashboardLink.style.display = 'none';
+  }
+}
+
+function handleLogout() {
+  currentUser = null;
+  localStorage.removeItem('driveSureUser');
+  setToken(null);
+  updateNavBar();
+  showPage('landing');
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────
+// MODALS
+// ─────────────────────────────────────────────
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ─────────────────────────────────────────────
+// LOGIN TABS
+// ─────────────────────────────────────────────
+
+function switchLoginTab(type) {
+  ['customer','agent','admin'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === type);
+    document.getElementById('login-' + t).style.display = t === type ? 'block' : 'none';
+  });
+}
+
+function showRegister() {
+  document.getElementById('login-form-customer').style.display = 'none';
+  document.getElementById('register-form-customer').style.display = 'block';
+}
+
+function showLogin() {
+  document.getElementById('login-form-customer').style.display = 'block';
+  document.getElementById('register-form-customer').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+
+async function loginCustomer() {
+  const email = document.getElementById('custEmail').value.trim();
+  const pass = document.getElementById('custPass').value;
+  const errEl = document.getElementById('loginError');
+  
+  if (!email || !pass) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    const result = await apiCall('/auth/login', 'POST', { email, password: pass });
+    errEl.style.display = 'none';
+    saveUser(result.user, result.token);
+    updateNavBar();
+    
+    const selectedPlan = sessionStorage.getItem('selectedPlan');
+    if (selectedPlan) {
+      closeModal('loginModal');
+      showPaymentPage(selectedPlan);
+      sessionStorage.removeItem('selectedPlan');
+    } else {
+      closeModal('loginModal');
+      showPage('landing');
+    }
+  } catch (error) {
+    errEl.textContent = error.message || 'Incorrect email or password.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function registerCustomer() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const errEl = document.getElementById('registerError');
+  
+  if (!first || !last || !email || !pass) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    const result = await apiCall('/auth/register', 'POST', {
+      first_name: first,
+      last_name: last,
+      email,
+      phone,
+      password: pass
+    });
+    errEl.style.display = 'none';
+    saveUser(result.user, result.token);
+    updateNavBar();
+    
+    const selectedPlan = sessionStorage.getItem('selectedPlan');
+    if (selectedPlan) {
+      closeModal('loginModal');
+      showPaymentPage(selectedPlan);
+      sessionStorage.removeItem('selectedPlan');
+    } else {
+      closeModal('loginModal');
+      showPage('landing');
+    }
+  } catch (error) {
+    errEl.textContent = error.message || 'Registration failed.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function loginAgent() {
+  const email = document.getElementById('agentUser').value.trim();
+  const pass = document.getElementById('agentPass').value;
+  const errEl = document.getElementById('agentLoginError');
+  
+  if (!email || !pass) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    const result = await apiCall('/auth/login', 'POST', { email, password: pass });
+    if (result.user.role !== 'agent' && result.user.role !== 'mechanic') {
+      throw new Error('This account is not an agent account.');
+    }
+    errEl.style.display = 'none';
+    saveUser(result.user, result.token);
+    closeModal('loginModal');
+    loadAgentDash();
+    showPage('agent');
+  } catch (error) {
+    errEl.textContent = error.message || 'Invalid credentials.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function loginAdmin() {
+  const email = document.getElementById('adminUser').value.trim();
+  const pass = document.getElementById('adminPass').value;
+  const errEl = document.getElementById('adminLoginError');
+  
+  if (!email || !pass) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    const result = await apiCall('/auth/login', 'POST', { email, password: pass });
+    if (result.user.role !== 'admin') {
+      throw new Error('This account is not an admin account.');
+    }
+    errEl.style.display = 'none';
+    saveUser(result.user, result.token);
+    closeModal('loginModal');
+    loadAdminDash();
+    showPage('admin');
+  } catch (error) {
+    errEl.textContent = error.message || 'Invalid credentials.';
+    errEl.style.display = 'block';
+  }
+}
+
+function logout() {
+  handleLogout();
+}
+
+// ─────────────────────────────────────────────
+// DASH TAB SWITCHING
+// ─────────────────────────────────────────────
+
+function switchDashTab(role, panelId) {
+  const tabs = document.querySelectorAll(`#page-${role} .dash-tab`);
+  const panels = document.querySelectorAll(`#page-${role} .dash-panel`);
+  tabs.forEach(t => t.classList.remove('active'));
+  panels.forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`${role}-panel-${panelId}`).classList.add('active');
+
+  if (role === 'customer') loadCustomerPanel(panelId);
+  if (role === 'agent') loadAgentPanel(panelId);
+  if (role === 'admin') loadAdminPanel(panelId);
+}
+
+// ─────────────────────────────────────────────
+// CUSTOMER DASH
+// ─────────────────────────────────────────────
+
+function loadCustomerDash() {
+  document.getElementById('custGreeting').textContent = 'Hi, ' + currentUser.first;
+  document.getElementById('custAvatar').textContent = (currentUser.first[0] + currentUser.last[0]).toUpperCase();
+  loadCustomerPanel('request');
+}
+
+function loadCustomerPanel(panel) {
+  if (panel === 'request') {
+    // Initialize the submit request form
+    const el = document.getElementById('custRequestsList');
+    if (el && el.innerHTML === '') {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><p>Fill in the form above and submit your request to get started.</p></div>`;
+    }
+  }
+  if (panel === 'myrequests') renderCustRequests();
+  if (panel === 'review') {
+    // Initialize star rating
+    currentStarVal = 0;
+    document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('lit'));
+  }
+}
+
+function renderCustRequests() {
+  const myReqs = DB.requests.filter(r => r.userId === currentUser.id);
+  const el = document.getElementById('custRequestsList');
+  if (myReqs.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No requests yet. Submit your first car search request!</p></div>`;
+    return;
+  }
+  el.innerHTML = myReqs.map(r => `
+    <div style="border:1px solid var(--gray-light);border-radius:10px;padding:1.25rem;margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+        <div>
+          <strong style="font-size:1rem;color:var(--blue);">${r.carType} – ${r.make || 'Any make'}</strong>
+          <div style="font-size:0.8rem;color:var(--gray);margin-top:0.2rem;">Submitted: ${r.date}</div>
+        </div>
+        <span class="status-badge status-${r.status}">${capitalize(r.status)}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+        <span class="tag">R${Number(r.budgetMin).toLocaleString()} – R${Number(r.budgetMax).toLocaleString()}</span>
+        <span class="tag">${r.area}</span>
+        <span class="tag red">${r.plan}</span>
+      </div>
+      ${r.agentNotes ? `<div class="notes-box"><strong>Agent Update:</strong> ${r.agentNotes}</div>` : ''}
+      ${r.scheduleDate ? `<div class="alert info" style="margin-top:0.5rem;">📅 Viewing scheduled: <strong>${r.scheduleDate}</strong></div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function submitRequest() {
+  const carType = document.getElementById('reqCarType').value;
+  const make = document.getElementById('reqMake').value.trim();
+  const budgetMin = document.getElementById('reqBudgetMin').value;
+  const budgetMax = document.getElementById('reqBudgetMax').value;
+  const area = document.getElementById('reqArea').value.trim();
+  const plan = document.getElementById('reqPlan').value;
+
+  if (!carType || !budgetMin || !budgetMax || !area || !plan) {
+    alert('Please fill in all required fields (Car Type, Budget, Area, and Plan).');
+    return;
+  }
+
+  try {
+    const payload = {
+      car_type: carType,
+      make: make || null,
+      budget_min: Number(budgetMin),
+      budget_max: Number(budgetMax),
+      area,
+      year_range: document.getElementById('reqYear').value || null,
+      plan,
+      viewing_preference: document.getElementById('reqViewing').value || null,
+      notes: document.getElementById('reqNotes').value || null
+    };
+    
+    await apiCall('/requests', 'POST', payload);
+    alert('✅ Your request has been submitted! Our team will contact you with payment details shortly. Thank you for choosing Drive Sure.');
+
+    // Clear form
+    ['reqCarType','reqMake','reqBudgetMin','reqBudgetMax','reqArea','reqYear','reqNotes','reqPlan'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  } catch (error) {
+    alert('❌ Error submitting request: ' + error.message);
+  }
+}
+
+// ─────────────────────────────────────────────
+// REVIEWS
+// ─────────────────────────────────────────────
+
+let currentStarVal = 0;
+
+function setStars(n) {
+  currentStarVal = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('lit', i < n);
+  });
+}
+
+async function submitReview() {
+  const text = document.getElementById('reviewText').value.trim();
+  if (!currentStars) { alert('Please select a star rating.'); return; }
+  if (!text) { alert('Please write a review.'); return; }
+
+  try {
+    await apiCall('/reviews', 'POST', {
+      stars: currentStars,
+      plan: document.getElementById('reviewPlan').value,
+      text: text
+    });
+
+    document.getElementById('reviewText').value = '';
+    setStars(0);
+    alert('✅ Thank you for your review! It will appear publicly once approved by our admin.');
+  } catch (error) {
+    alert('❌ Error submitting review: ' + error.message);
+  }
+}
+
+async function renderPublicReviews() {
+  try {
+    const result = await apiCall('/reviews');
+    const approved = result.reviews || [];
+    const el = document.getElementById('publicReviews');
+    if (!el) return;
+    
+    if (approved.length === 0) {
+      el.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem;">
+          <div style="font-size: 2rem; margin-bottom: 1rem;">⭐</div>
+          <p style="font-size: 1rem; color: rgba(255,255,255,0.75);">No reviews yet. Be the first to share your Drive Sure experience!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    el.innerHTML = approved.map(r => `
+      <div class="review-card">
+        <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+        <div class="review-text">"${r.text}"</div>
+        <div class="review-author">
+          <div class="review-avatar">${r.user_name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+          <div>
+            <div class="review-name">${r.user_name}</div>
+            <div class="review-plan">${r.plan} Plan</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+  }
+}
+
+// ─────────────────────────────────────────────
+// AGENT DASH
+// ─────────────────────────────────────────────
+
+function loadAgentDash() {
+  const displayName = currentUser.first_name + ' ' + currentUser.last_name || currentUser.name;
+  document.getElementById('agentGreeting').textContent = displayName;
+  document.getElementById('agentAvatar').textContent = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  loadAgentPanel('overview');
+}
+
+async function loadAgentPanel(panel) {
+  if (panel === 'overview') await renderAgentOverview();
+  if (panel === 'requests') await renderAgentAllRequests();
+  if (panel === 'schedule') await renderAgentSchedule();
+}
+
+async function renderAgentOverview() {
+  try {
+    const result = await apiCall('/requests');
+    const all = result.requests || [];
+    const pending = all.filter(r => r.status === 'pending').length;
+    const active = all.filter(r => r.status === 'active').length;
+    const done = all.filter(r => r.status === 'done').length;
+    document.getElementById('agentStats').innerHTML = `
+      <div class="stat-card"><div class="stat-num">${all.length}</div><div class="stat-label">Total Requests</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--red);">${pending}</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#d97706;">${active}</div><div class="stat-label">In Progress</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#16a34a;">${done}</div><div class="stat-label">Completed</div></div>
+    `;
+    const pendingReqs = all.filter(r => r.status === 'pending');
+    const el = document.getElementById('agentPendingList');
+    if (!pendingReqs.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>No pending requests. All up to date!</p></div>`;
+      return;
+    }
+    el.innerHTML = renderRequestRows(pendingReqs, 'agent');
+  } catch (error) {
+    console.error('Error loading agent overview:', error);
+  }
+}
+
+async function renderAgentAllRequests() {
+  try {
+    const result = await apiCall('/requests');
+    const all = result.requests || [];
+    document.getElementById('agentAllRequests').innerHTML = renderRequestRows(all, 'agent');
+  } catch (error) {
+    console.error('Error loading agent requests:', error);
+  }
+}
+
+async function renderAgentSchedule() {
+  try {
+    const result = await apiCall('/requests');
+    const scheduled = (result.requests || []).filter(r => r.schedule_date);
+    const el = document.getElementById('agentSchedule');
+    if (!scheduled.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><p>No viewings scheduled yet.</p></div>`;
+      return;
+    }
+    el.innerHTML = scheduled.map(r => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;border-radius:8px;border:1px solid var(--gray-light);margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+          <strong style="color:var(--blue);">${r.user_name || 'Customer'}</strong> – ${r.car_type} ${r.make ? '(' + r.make + ')' : ''}
+          <div style="font-size:0.82rem;color:var(--gray);">${r.area} · ${r.plan}</div>
+        </div>
+        <div>
+          <span class="tag">📅 ${r.schedule_date}</span>
+          <span class="tag">${r.viewing_preference || 'Standard'}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading agent schedule:', error);
+  }
+}
+
+function renderRequestRows(requests, role) {
+  if (!requests.length) return `<div class="empty-state"><div class="empty-icon">📭</div><p>Nothing here yet.</p></div>`;
+  return `<div style="overflow-x:auto;">
+  <table class="requests-table">
+    <thead><tr>
+      <th>Customer</th><th>Car</th><th>Budget</th><th>Area</th><th>Plan</th><th>Status</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+      ${requests.map(r => `
+      <tr>
+        <td><strong>${r.user_name || 'Customer'}</strong><br><span style="font-size:0.78rem;color:var(--gray);">${r.user_email || 'N/A'}</span></td>
+        <td>${r.car_type}${r.make ? '<br><span style="font-size:0.78rem;color:var(--gray);">'+r.make+'</span>' : ''}</td>
+        <td>R${Number(r.budget_min).toLocaleString()}<br>– R${Number(r.budget_max).toLocaleString()}</td>
+        <td>${r.area}</td>\n        <td style="font-size:0.8rem;">${r.plan ? r.plan.split('–')[0] : 'N/A'}</td>
+        <td><span class="status-badge status-${r.status}">${capitalize(r.status)}</span></td>
+        <td style="white-space:nowrap;">
+          <button class="action-btn outline" style="margin-bottom:4px;" onclick="viewRequestDetail(${r.id},'${role}')">View</button>
+          ${role === 'agent' ? `
+          <select onchange="updateStatus(${r.id}, this.value, '${role}')" style="font-size:0.78rem;padding:0.3rem;border-radius:6px;border:1px solid var(--gray-light);color:var(--text);">
+            <option>Change status</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="done">Done</option>
+            <option value="cancelled">Cancelled</option>
+          </select>` : ''}
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+async function updateStatus(reqId, status, role) {
+  if (status === 'Change status') return;
+  try {
+    await apiCall(`/requests/${reqId}`, 'PUT', { status });
+    if (role === 'agent') await loadAgentPanel('requests');
+    if (role === 'admin') await loadAdminPanel('requests');
+  } catch (error) {
+    alert('Error updating status: ' + error.message);
+  }
+}\n\nasync function viewRequestDetail(reqId, role) {\n  try {\n    const result = await apiCall(`/requests/${reqId}`);\n    const r = result.request || result;
+  if (!r) return;
+  document.getElementById('requestDetailContent').innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <span class="status-badge status-${r.status}" style="margin-bottom:0.75rem;display:inline-block;">${capitalize(r.status)}</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;font-size:0.9rem;margin-top:0.5rem;">
+        <div><span style="color:var(--gray);">Customer</span><br><strong>${r.userName}</strong></div>
+        <div><span style="color:var(--gray);">Contact</span><br><strong>${r.userEmail}</strong><br>${r.userPhone}</div>
+        <div><span style="color:var(--gray);">Car Type</span><br><strong>${r.carType}</strong></div>
+        <div><span style="color:var(--gray);">Make</span><br><strong>${r.make || 'Any'}</strong></div>
+        <div><span style="color:var(--gray);">Budget</span><br><strong>R${Number(r.budgetMin).toLocaleString()} – R${Number(r.budgetMax).toLocaleString()}</strong></div>
+        <div><span style="color:var(--gray);">Area</span><br><strong>${r.area}</strong></div>
+        <div><span style="color:var(--gray);">Year Range</span><br><strong>${r.yearRange || 'Any'}</strong></div>
+        <div><span style="color:var(--gray);">Plan</span><br><strong>${r.plan}</strong></div>
+        <div><span style="color:var(--gray);">Viewing</span><br><strong>${r.viewing}</strong></div>
+        <div><span style="color:var(--gray);">Submitted</span><br><strong>${r.date}</strong></div>
+      </div>
+      ${r.notes ? `<div class="notes-box" style="margin-top:1rem;"><strong>Customer Notes:</strong><br>${r.notes}</div>` : ''}
+    </div>
+    <hr class="divider">
+    ${role !== 'customer' ? `
+    <div>
+      <div class="form-group">
+        <label>Agent Notes / Update for Customer</label>
+        <textarea id="detailAgentNotes" placeholder="Add notes visible to the customer...">${r.agentNotes}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Schedule Viewing Date</label>
+        <input type="date" id="detailSchedule" value="${r.scheduleDate}">
+      </div>
+      <button class="form-btn" onclick="saveRequestDetail('${r.id}', '${role}')">Save Changes</button>
+    </div>` : ''}
+  `;
+  openModal('requestDetailModal');
+}
+
+async function saveRequestDetail(reqId, role) {
+  try {
+    await apiCall(`/requests/${reqId}`, 'PUT', {
+      agent_notes: document.getElementById('detailAgentNotes').value,
+      schedule_date: document.getElementById('detailSchedule').value
+    });
+    closeModal('requestDetailModal');
+    alert('✅ Request updated successfully.');
+    if (role === 'agent') await loadAgentPanel('overview');
+    if (role === 'admin') await loadAdminPanel('requests');
+  } catch (error) {
+    alert('❌ Error saving request: ' + error.message);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ADMIN DASH
+// ─────────────────────────────────────────────
+
+function loadAdminDash() {
+  loadAdminPanel('overview');
+}
+
+async function loadAdminPanel(panel) {
+  if (panel === 'overview') await renderAdminOverview();
+  if (panel === 'requests') await renderAdminRequests();
+  if (panel === 'users') await renderAdminUsers();
+  if (panel === 'reviews') await renderAdminReviews();
+  if (panel === 'support') await renderAdminSupport();
+}
+
+async function renderAdminOverview() {
+  try {
+    const reqResult = await apiCall('/requests');
+    const revResult = await apiCall('/reviews/admin/all');
+    const allReqs = reqResult.requests || [];
+    const allRevs = revResult.reviews || [];
+    
+    const total = allReqs.length;
+    const pending = allReqs.filter(r => r.status === 'pending').length;
+    const pendingReviews = allRevs.filter(r => !r.approved).length;
+   
+    document.getElementById('adminStats').innerHTML = `
+      <div class="stat-card"><div class="stat-num">${allReqs.length}</div><div class="stat-label">Total Requests</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--red);">${pending}</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num">${allRevs.length}</div><div class="stat-label">Total Reviews</div></div>
+      <div class="stat-card"><div class="stat-num">${pendingReviews}</div><div class="stat-label">Reviews Pending</div></div>
+    `;
+    
+    const recent = [...allReqs].reverse().slice(0,5);
+    document.getElementById('adminActivity').innerHTML = recent.map(r => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--gray-light);">
+        <div>
+          <strong style="font-size:0.9rem;">${r.user_name || 'Customer'}</strong> –
+          <span style="font-size:0.9rem;color:var(--gray);">${r.car_type}, ${r.plan ? r.plan.split('–')[0] : 'N/A'}</span>
+        </div>
+        <span class="status-badge status-${r.status}">${capitalize(r.status)}</span>
+      </div>
+    `).join('') || '<p style="color:var(--gray);">No activity yet.</p>';
+  } catch (error) {
+    console.error('Error loading admin overview:', error);
+  }
+}
+
+async function renderAdminRequests() {
+  try {
+    const result = await apiCall('/requests');
+    const allReqs = result.requests || [];
+    document.getElementById('adminAllRequests').innerHTML = renderRequestRows(allReqs, 'admin');
+  } catch (error) {
+    console.error('Error loading admin requests:', error);
+  }
+}
+
+async function renderAdminUsers() {
+  // Note: User management through API would require additional backend endpoints
+  // For now, showing a message to admin
+  const el = document.getElementById('adminUsers');
+  el.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--gray);">
+    <p>User management is available through the backend database directly.</p>
+    <p style="font-size:0.9rem;margin-top:1rem;">Contact information is available through support messages tab.</p>
+  </div>`;
+}
+
+async function renderAdminReviews() {
+  try {
+    const result = await apiCall('/reviews/admin/all');
+    const allReviews = result.reviews || [];
+    const el = document.getElementById('adminReviews');
+    if (!allReviews.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No reviews yet.</p></div>`;
+      return;
+    }
+    el.innerHTML = allReviews.map(r => `
+      <div style="padding:1rem;border:1px solid var(--gray-light);border-radius:10px;margin-bottom:0.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <strong>${r.user_name}</strong> · ${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)} · ${r.plan} Plan
+            <div style="font-size:0.85rem;font-style:italic;color:var(--gray);margin-top:0.3rem;">"${r.text}"</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+            ${!r.approved ? `<button class="action-btn green" onclick="approveReview(${r.id})">Approve</button>` : `<span class="status-badge status-active">Live</span>`}
+            <button class="action-btn red" onclick="deleteReview(${r.id})">Remove</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading admin reviews:', error);
+  }
+}
+
+async function renderAdminSupport() {
+  try {
+    const result = await apiCall('/contact');
+    const messages = result.messages || [];
+    const el = document.getElementById('adminSupport');
+    if (!messages.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📬</div><p>No support messages yet.</p></div>`;
+      return;
+    }
+    el.innerHTML = messages.map((m, i) => `
+      <div style="padding:1rem;border:1px solid var(--gray-light);border-radius:10px;margin-bottom:0.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <strong>${m.name}</strong> – ${m.subject} <span style="color:var(--gray);font-size:0.8rem;">${m.created_at.slice(0,10)}</span>
+            <div style="font-size:0.85rem;color:var(--gray);margin-top:0.3rem;">${m.message}</div>
+          </div>
+          <button class="action-btn outline" onclick="dismissSupport(${m.id})">Dismiss</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading support messages:', error);
+  }
+}
+
+function sendBroadcast() {
+  const msg = document.getElementById('broadcastMsg').value.trim();
+  if (!msg) { alert('Please enter a message.'); return; }
+  DB.broadcasts.push({ message: msg, date: new Date().toISOString().slice(0,10) });
+  document.getElementById('broadcastMsg').value = '';
+  alert('✅ Broadcast sent to all customers!');
+}
+
+// ─────────────────────────────────────────────
+// SUPPORT
+// ─────────────────────────────────────────────
+
+function submitSupport() {
+  const subject = document.getElementById('supportSubject').value.trim();
+  const message = document.getElementById('supportMessage').value.trim();
+  if (!subject || !message) { alert('Please fill in all fields.'); return; }
+  DB.supportMessages.push({
+    name: currentUser ? (currentUser.first + ' ' + currentUser.last) : 'Guest',
+    email: currentUser ? currentUser.email : '',
+    subject, message, date: new Date().toISOString().slice(0,10)
+  });
+  document.getElementById('supportSubject').value = '';
+  document.getElementById('supportMessage').value = '';
+  closeModal('supportModal');
+  alert('✅ Your message has been sent! Our admin team will be in touch shortly.');
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+
+function capitalize(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+
+renderPublicReviews();
+</script>
+</body>
+</html>
