@@ -155,7 +155,7 @@ const saveProfile = async () => {
   try {
     const token = localStorage.getItem('token');
     await axios.put(
-      `http://localhost:3001/api/profile/${user.value.id}`,
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}`,
       editData.value,
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -175,7 +175,7 @@ const changePassword = async () => {
   try {
     const token = localStorage.getItem('token');
     await axios.post(
-      `http://localhost:3001/api/profile/${user.value.id}/change-password`,
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}/change-password`,
       {
         currentPassword: passwordData.value.currentPassword,
         newPassword: passwordData.value.newPassword
@@ -195,7 +195,7 @@ const fetchUserData = async () => {
     const token = localStorage.getItem('token');
 
     const response = await axios.get(
-      `http://localhost:3001/api/profile/${storedUser.id}`,
+      `https://drivesure-production.up.railway.app/api/profile/${storedUser.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -207,14 +207,14 @@ const fetchUserData = async () => {
 
     // Fetch requests
     const reqResponse = await axios.get(
-      `http://localhost:3001/api/requests`,
+      `https://drivesure-production.up.railway.app/api/requests`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     requests.value = reqResponse.data.filter(r => r.customer_id === storedUser.id);
 
     // Fetch reviews
     const revResponse = await axios.get(
-      `http://localhost:3001/api/reviews`,
+      `https://drivesure-production.up.railway.app/api/reviews`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     reviews.value = revResponse.data.filter(r => r.author_id === storedUser.id);
@@ -251,7 +251,7 @@ const checkForRequestUpdates = async (userId) => {
     // Get all requests for this user
     const token = localStorage.getItem('token');
     const response = await axios.get(
-      `http://localhost:3001/api/requests`,
+      `https://drivesure-production.up.railway.app/api/requests`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 

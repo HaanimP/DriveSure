@@ -292,7 +292,7 @@ const saveProfile = async () => {
   try {
     const token = localStorage.getItem('token');
     await axios.put(
-      `http://localhost:3001/api/profile/${user.value.id}`,
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}`,
       editData.value,
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -312,7 +312,7 @@ const changePassword = async () => {
   try {
     const token = localStorage.getItem('token');
     await axios.post(
-      `http://localhost:3001/api/profile/${user.value.id}/change-password`,
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}/change-password`,
       {
         currentPassword: passwordData.value.currentPassword,
         newPassword: passwordData.value.newPassword
@@ -339,7 +339,7 @@ const approveReview = async (reviewId) => {
   try {
     const token = localStorage.getItem('token');
     await axios.put(
-      `http://localhost:3001/api/reviews/${reviewId}`,
+      `https://drivesure-production.up.railway.app/api/reviews/${reviewId}`,
       { approved: true },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -355,7 +355,7 @@ const rejectReview = async (reviewId) => {
   try {
     const token = localStorage.getItem('token');
     await axios.delete(
-      `http://localhost:3001/api/reviews/${reviewId}`,
+      `https://drivesure-production.up.railway.app/api/reviews/${reviewId}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     reviews.value = reviews.value.filter(r => r.id !== reviewId);
@@ -372,7 +372,7 @@ const fetchUserData = async () => {
 
     // Fetch admin profile
     const response = await axios.get(
-      `http://localhost:3001/api/profile/${storedUser.id}`,
+      `https://drivesure-production.up.railway.app/api/profile/${storedUser.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     user.value = response.data;
@@ -380,7 +380,7 @@ const fetchUserData = async () => {
 
     // Fetch all users
     const usersResponse = await axios.get(
-      `http://localhost:3001/api/users`,
+      `https://drivesure-production.up.railway.app/api/users`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     allUsers.value = usersResponse.data.map(u => ({
@@ -390,14 +390,14 @@ const fetchUserData = async () => {
 
     // Fetch reviews
     const revResponse = await axios.get(
-      `http://localhost:3001/api/reviews`,
+      `https://drivesure-production.up.railway.app/api/reviews`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     reviews.value = revResponse.data;
 
     // Fetch contact messages
     const msgResponse = await axios.get(
-      `http://localhost:3001/api/contact`,
+      `https://drivesure-production.up.railway.app/api/contact`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     contactMessages.value = msgResponse.data;
