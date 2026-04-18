@@ -71,21 +71,21 @@ router.post('/:userId/change-password', verifyToken, async (req, res) => {
     }
 
     const connection = await pool.getConnection();
-    const [users] = await connection.query('SELECT password FROM users WHERE id = ?', [req.params.userId]);
+    const [users] = await connection.query('SELECT password_hash FROM users WHERE id = ?', [req.params.userId]);
 
     if (users.length === 0) {
       connection.release();
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const passwordMatch = await bcrypt.compare(currentPassword, users[0].password);
+    const passwordMatch = await bcrypt.compare(currentPassword, users[0].password_hash);
     if (!passwordMatch) {
       connection.release();
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await connection.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.params.userId]);
+    await connection.query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, req.params.userId]);
     connection.release();
 
     res.json({ message: 'Password changed successfully' });

@@ -28,7 +28,7 @@ router.post('/register', async (req, res) => {
 
     // Insert user
     const [result] = await connection.query(
-      'INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (first_name, last_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
       [first, last, email, phone || '', hashedPassword, 'customer']
     );
 
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
     const user = users[0];
     console.log(`[LOGIN] User found: ${user.first_name} ${user.last_name} (role: ${user.role})`);
     
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
     console.log(`[LOGIN] Password match: ${passwordMatch}`);
 
     if (!passwordMatch) {
