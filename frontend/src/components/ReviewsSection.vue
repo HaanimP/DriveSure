@@ -92,11 +92,18 @@ const fetchReviews = async () => {
     console.log('📊 Reviews API Response:', response)
     console.log('📊 Response type:', typeof response)
     console.log('📊 Is Array?', Array.isArray(response))
+    
     reviews.value = Array.isArray(response) ? response : response.reviews || []
+    
     console.log('✅ Reviews set to:', reviews.value)
     console.log('📊 Reviews length:', reviews.value.length)
-    console.log('📊 Review IDs:', reviews.value.map(r => r.id).join(', '))
-    console.log('📊 Review texts:', reviews.value.map(r => r.text).join(' | '))
+    console.log('📊 Full reviews array:', JSON.stringify(reviews.value, null, 2))
+    
+    // Show each review individually
+    reviews.value.forEach((r, i) => {
+      console.log(`   Review ${i}: ID=${r.id}, text="${r.text}", stars=${r.stars}`)
+    })
+    
     console.log('📊 Current index:', currentReviewIndex.value)
   } catch (err) {
     console.error('❌ Error loading reviews:', err)
