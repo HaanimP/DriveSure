@@ -18,7 +18,7 @@ const getEnvValue = (key) => {
 
 // Build pool configuration
 const poolConfig = {
-  host: getEnvValue('DB_HOST') || 'mysql.railway.internal',
+  host: getEnvValue('DB_HOST') || 'mysql',
   port: parseInt(getEnvValue('DB_PORT')) || 3306,
   user: getEnvValue('DB_USER') || 'root',
   password: getEnvValue('DB_PASSWORD'),
