@@ -40,28 +40,28 @@ router.post('/', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    // Try using customer_id first (for production), fall back to user_id
+    // Try using customer_id first (production Railway uses this), fall back to user_id if needed
     let insertQuery;
     try {
-      // Try user_id first
+      // Try customer_id first (production column name)
       const [result] = await connection.query(
-        'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO requests (customer_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
       );
-      console.log('✅ Request created with user_id - ID:', result.insertId);
+      console.log('✅ Request created with customer_id - ID:', result.insertId);
       res.json({ id: result.insertId, message: 'Request created successfully' });
-    } catch (userIdError) {
-      // If user_id fails, try customer_id
-      if (userIdError.code === 'ER_BAD_FIELD_ERROR' || userIdError.code === 'ER_NO_DEFAULT_FOR_FIELD') {
-        console.log('⚠️  user_id column not available, trying customer_id:', userIdError.code);
+    } catch (customerIdError) {
+      // If customer_id fails, try user_id
+      if (customerIdError.code === 'ER_BAD_FIELD_ERROR') {
+        console.log('⚠️  customer_id column not available, trying user_id:', customerIdError.code);
         const [result] = await connection.query(
-          'INSERT INTO requests (customer_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
         );
-        console.log('✅ Request created with customer_id - ID:', result.insertId);
+        console.log('✅ Request created with user_id - ID:', result.insertId);
         res.json({ id: result.insertId, message: 'Request created successfully' });
       } else {
-        throw userIdError;
+        throw customerIdError;
       }
     }
   } catch (error) {
@@ -88,30 +88,30 @@ router.get('/all', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    // Check which column exists
+    // Try customer_id first (production), then user_id
     let query = `
       SELECT r.*, u.first_name, u.last_name, u.email, u.phone
       FROM requests r
-      JOIN users u ON r.user_id = u.id
+      JOIN users u ON r.customer_id = u.id
       ORDER BY r.created_at DESC
     `;
     
     try {
       const [requests] = await connection.query(query);
-      console.log('✅ Query executed with user_id, found', requests.length, 'requests');
+      console.log('✅ Query executed with customer_id, found', requests.length, 'requests');
       res.json({ requests });
     } catch (err) {
-      // Try with customer_id
+      // Try with user_id
       if (err.code === 'ER_BAD_FIELD_ERROR') {
-        console.log('⚠️  user_id column not found, trying customer_id');
+        console.log('⚠️  customer_id column not found, trying user_id');
         query = `
           SELECT r.*, u.first_name, u.last_name, u.email, u.phone
           FROM requests r
-          JOIN users u ON r.customer_id = u.id
+          JOIN users u ON r.user_id = u.id
           ORDER BY r.created_at DESC
         `;
         const [requests] = await connection.query(query);
-        console.log('✅ Query executed with customer_id, found', requests.length, 'requests');
+        console.log('✅ Query executed with user_id, found', requests.length, 'requests');
         res.json({ requests });
       } else {
         throw err;
@@ -144,27 +144,27 @@ router.get('/agent/view', async (req, res) => {
     let query = `
       SELECT r.*, u.first_name, u.last_name, u.email, u.phone
       FROM requests r
-      JOIN users u ON r.user_id = u.id
+      JOIN users u ON r.customer_id = u.id
       WHERE r.status IN ('pending', 'in-progress')
       ORDER BY r.created_at DESC
     `;
     
     try {
       const [requests] = await connection.query(query);
-      console.log('✅ Query executed with user_id, found', requests.length, 'requests');
+      console.log('✅ Query executed with customer_id, found', requests.length, 'requests');
       res.json({ requests });
     } catch (err) {
       if (err.code === 'ER_BAD_FIELD_ERROR') {
-        console.log('⚠️  user_id column not found, trying customer_id');
+        console.log('⚠️  customer_id column not found, trying user_id');
         query = `
           SELECT r.*, u.first_name, u.last_name, u.email, u.phone
           FROM requests r
-          JOIN users u ON r.customer_id = u.id
+          JOIN users u ON r.user_id = u.id
           WHERE r.status IN ('pending', 'in-progress')
           ORDER BY r.created_at DESC
         `;
         const [requests] = await connection.query(query);
-        console.log('✅ Query executed with customer_id, found', requests.length, 'requests');
+        console.log('✅ Query executed with user_id, found', requests.length, 'requests');
         res.json({ requests });
       } else {
         throw err;
@@ -195,18 +195,18 @@ router.get('/user/:userId', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    let query = 'SELECT * FROM requests WHERE user_id = ? ORDER BY created_at DESC';
+    let query = 'SELECT * FROM requests WHERE customer_id = ? ORDER BY created_at DESC';
     
     try {
       const [requests] = await connection.query(query, [userId]);
-      console.log('✅ Query executed with user_id, found', requests.length, 'requests for user', userId);
+      console.log('✅ Query executed with customer_id, found', requests.length, 'requests for user', userId);
       res.json({ requests });
     } catch (err) {
       if (err.code === 'ER_BAD_FIELD_ERROR') {
-        console.log('⚠️  user_id column not found, trying customer_id');
-        query = 'SELECT * FROM requests WHERE customer_id = ? ORDER BY created_at DESC';
+        console.log('⚠️  customer_id column not found, trying user_id');
+        query = 'SELECT * FROM requests WHERE user_id = ? ORDER BY created_at DESC';
         const [requests] = await connection.query(query, [userId]);
-        console.log('✅ Query executed with customer_id, found', requests.length, 'requests for user', userId);
+        console.log('✅ Query executed with user_id, found', requests.length, 'requests for user', userId);
         res.json({ requests });
       } else {
         throw err;
