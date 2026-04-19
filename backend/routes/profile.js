@@ -7,8 +7,11 @@ const router = express.Router();
 
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const jwtSecret = process.env.JWT_SECRET;
   console.log('🔐 verifyToken called');
+  console.log('   JWT_SECRET status:', jwtSecret ? `✅ Present (${jwtSecret.substring(0, 20)}...)` : '❌ UNDEFINED!');
+  
+  const authHeader = req.headers.authorization;
   console.log('   Authorization header:', authHeader ? '✅ Present' : '❌ Missing');
   
   const token = authHeader?.split(' ')[1];
@@ -20,7 +23,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     console.log('✅ Token verified for user ID:', decoded.id);
     req.user = decoded;
     next();

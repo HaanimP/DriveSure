@@ -13,6 +13,12 @@ import { runMigration } from './migrate-production.js';
 
 dotenv.config();
 
+console.log('🔧 SERVER STARTUP - Environment Variables:');
+console.log('   PORT:', process.env.PORT || '3001');
+console.log('   JWT_SECRET:', process.env.JWT_SECRET ? `✅ Present (${process.env.JWT_SECRET.substring(0, 30)}...)` : '❌ UNDEFINED!');
+console.log('   DB_HOST:', process.env.DB_HOST || '❌ NOT SET');
+console.log('   NODE_ENV:', process.env.NODE_ENV || 'development');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

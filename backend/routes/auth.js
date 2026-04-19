@@ -60,6 +60,9 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    console.log(`[LOGIN] JWT_SECRET status:`, jwtSecret ? `✅ Present (${jwtSecret.substring(0, 20)}...)` : '❌ UNDEFINED!');
+
     connection = await pool.getConnection();
     console.log(`[LOGIN] Querying user: ${email}`);
     
@@ -82,9 +85,10 @@ router.post('/login', async (req, res) => {
     }
 
     const userResponse = { id: user.id, first: user.first_name, last: user.last_name, email: user.email, role: user.role };
-    const token = jwt.sign(userResponse, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userResponse, jwtSecret, { expiresIn: '7d' });
 
     console.log(`[LOGIN] Login successful for: ${email}`);
+    console.log(`[LOGIN] Generated token: ${token.substring(0, 30)}...`);
     res.json({ user: userResponse, token });
   } catch (error) {
     console.error('[LOGIN] Error:', error.message, error.code);
