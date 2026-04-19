@@ -975,15 +975,19 @@ body.dark-mode .form-group input:focus {
 
 @media (max-width: 768px) {
   .profile-container {
-    padding: 0.75rem;
-    padding-top: 75px;
+    padding: 0.75rem !important;
+    padding-top: 5px !important;
   }
 
   .profile-header {
     padding: 1.25rem;
     flex-direction: column;
     text-align: center;
+    margin-top: 0px !important;
+    margin-bottom: 15px !important;
   }
+
+
 
   .profile-content {
     flex-direction: column;
@@ -1030,12 +1034,14 @@ body.dark-mode .form-group input:focus {
 
 @media (max-width: 600px) {
   .profile-container {
-    padding: 0.5rem;
-    padding-top: 65px;
+    padding: 0.5rem !important;
+    padding-top: 0px !important;
   }
 
   .profile-header {
     padding: 1rem;
+    margin-top: 0px !important;
+    margin-bottom: 10px !important;
   }
 
   .profile-content {
