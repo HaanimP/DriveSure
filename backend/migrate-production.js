@@ -51,6 +51,19 @@ async function runMigration() {
     
     const requestColumnNames = requestColumns.map(col => col.COLUMN_NAME);
     
+    // Check if we need to rename customer_id to user_id
+    if (requestColumnNames.includes('customer_id') && !requestColumnNames.includes('user_id')) {
+      console.log('⚠️  Renaming customer_id column to user_id...');
+      try {
+        await connection.query(`ALTER TABLE requests RENAME COLUMN customer_id TO user_id`);
+        console.log('✅ Renamed customer_id column to user_id');
+        // Update the column names list
+        requestColumnNames[requestColumnNames.indexOf('customer_id')] = 'user_id';
+      } catch (err) {
+        console.log(`⚠️  Could not rename customer_id:`, err.message);
+      }
+    }
+    
     // Check and add missing columns
     const requiredColumns = {
       'user_id': 'INT NOT NULL',
@@ -60,7 +73,7 @@ async function runMigration() {
       'budget_max': 'INT',
       'area': 'VARCHAR(100)',
       'year_range': 'VARCHAR(50)',
-      'plan': 'VARCHAR(100)',
+      'plan': "VARCHAR(100) DEFAULT 'Premium'",
       'viewing_preference': 'VARCHAR(100)',
       'notes': 'TEXT',
       'status': "VARCHAR(50) DEFAULT 'pending'",
