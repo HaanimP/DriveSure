@@ -202,7 +202,12 @@ const fetchUserReviews = async () => {
     // Get all reviews and filter for current user
     const response = await apiClient.get('/reviews/admin/all')
     const allReviews = Array.isArray(response) ? response : response.reviews || []
-    userReviews.value = allReviews.filter(r => r.user_id === userData.id)
+    console.log('📊 All reviews fetched:', allReviews)
+    console.log('👤 Current user ID:', userData.id)
+    
+    // Filter by customer_id (not user_id, as the API returns customer_id)
+    userReviews.value = allReviews.filter(r => r.customer_id === userData.id)
+    console.log('✅ User reviews:', userReviews.value)
   } catch (error) {
     console.error('Error fetching user reviews:', error)
   } finally {
@@ -226,6 +231,15 @@ const formatDate = (date) => {
 onMounted(() => {
   fetchUserRequests()
   fetchUserReviews()
+  
+  // Auto-refresh reviews every 3 seconds to catch newly posted ones
+  const refreshInterval = setInterval(() => {
+    fetchUserReviews()
+  }, 3000)
+  
+  return () => {
+    clearInterval(refreshInterval)
+  }
 })
 </script>
 
