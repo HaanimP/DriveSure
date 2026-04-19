@@ -253,15 +253,61 @@ const approvedReviews = computed(() => reviews.value.filter(r => r.approved));
 
 const triggerFileInput = () => fileInput.value?.click();
 
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxWidth = 800;
+        const maxHeight = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress to JPEG with 0.8 quality
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+    };
+  });
+};
+
 const onPictureChange = async (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      profilePicture.value = e.target.result;
-      editData.value.profile_picture = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Check file size (max 5MB before compression)
+      if (file.size > 5 * 1024 * 1024) {
+        showMessage('Image is too large. Please choose a file under 5MB.', 'error');
+        return;
+      }
+
+      const compressedImage = await compressImage(file);
+      profilePicture.value = compressedImage;
+      editData.value.profile_picture = compressedImage;
+      showMessage('Image compressed and ready to upload', 'success');
+    } catch (error) {
+      showMessage('Failed to process image', 'error');
+    }
   }
 };
 
@@ -291,12 +337,40 @@ const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString();
 const saveProfile = async () => {
   try {
     const token = localStorage.getItem('token');
-    await axios.put(
-      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}`,
-      editData.value,
-      { headers: { Authorization: `Bearer ${token}` } }
+    
+    // Prepare form data for multipart upload
+    const formData = new FormData();
+    formData.append('first_name', editData.value.first_name);
+    formData.append('last_name', editData.value.last_name);
+    formData.append('phone', editData.value.phone);
+
+    // Handle profile picture if it's a data URL (from compression)
+    if (editData.value.profile_picture && editData.value.profile_picture.startsWith('data:')) {
+      // Convert data URL to blob
+      const response = await fetch(editData.value.profile_picture);
+      const blob = await response.blob();
+      formData.append('profile_picture', blob, 'profile.jpg');
+    }
+
+    await axios.post(
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}/update`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }
     );
-    user.value = { ...user.value, ...editData.value };
+
+    // Update local user data without the large data URL
+    user.value = {
+      ...user.value,
+      first_name: editData.value.first_name,
+      last_name: editData.value.last_name,
+      phone: editData.value.phone
+    };
+    
     showMessage('Profile updated successfully!', 'success');
   } catch (error) {
     showMessage(error.response?.data?.error || 'Failed to update profile', 'error');
@@ -1070,6 +1144,10 @@ body.dark-mode .form-group input:focus {
     padding: 1.5rem;
   }
 
+  .profile-content {
+    gap: 20px;
+  }
+
   .profile-picture {
     width: 140px;
     height: 140px;
@@ -1128,6 +1206,7 @@ body.dark-mode .form-group input:focus {
     -webkit-overflow-scrolling: touch;
     border-bottom: 2px solid #e0e0e0;
     margin-bottom: 1.5rem;
+    gap: 5px;
   }
 
   .profile-tab {
@@ -1250,6 +1329,10 @@ body.dark-mode .form-group input:focus {
     padding: 1rem;
   }
 
+  .profile-content {
+    gap: 0.75rem;
+  }
+
   .profile-picture {
     width: 100px;
     height: 100px;
@@ -1261,7 +1344,7 @@ body.dark-mode .form-group input:focus {
 
   .profile-tabs {
     display: flex;
-    gap: 0;
+    gap: 2px;
   }
 
   .profile-tab {
@@ -1310,7 +1393,7 @@ body.dark-mode .form-group input:focus {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     font-size: 0.75rem;
     padding: 0.6rem 0.4rem;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
 
   .search-bar {
