@@ -59,7 +59,12 @@ app.use('/api/users', usersRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'Backend is running' });
+  res.json({ status: 'Backend is running', timestamp: new Date().toISOString() });
+});
+
+// Simple root endpoint for readiness check
+app.get('/', (req, res) => {
+  res.json({ status: 'OK' });
 });
 
 // Global error handler

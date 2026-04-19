@@ -33,15 +33,15 @@ router.post('/', async (req, res) => {
 // Get approved reviews
 router.get('/', async (req, res) => {
   try {
-    console.log('📊 GET /reviews called');
+    console.log('📊 GET /api/reviews called at', new Date().toISOString());
     const connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
     const [reviews] = await connection.query('SELECT * FROM reviews WHERE approved = true ORDER BY created_at DESC');
-    console.log('✅ Query result:', reviews);
-    console.log('✅ Review count:', reviews.length);
+    console.log('✅ Query executed, found', reviews.length, 'reviews');
     connection.release();
     res.json(reviews);
   } catch (error) {
-    console.error('❌ Get reviews error:', error);
+    console.error('❌ Get reviews error:', error.message);
     res.status(500).json({ error: 'Failed to get reviews' });
   }
 });
