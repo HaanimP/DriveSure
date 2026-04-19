@@ -16,7 +16,9 @@
                  class="review-card"
                  :class="{ active: index === currentReviewIndex }"
                  :data-review-id="review.id"
-                 :data-review-index="index">
+                 :data-review-index="index"
+                 :data-is-active="index === currentReviewIndex"
+                 @mounted="console.log('🎴 Review card mounted:', review.id)">
               <div class="review-content">
                 <div class="stars">
                   <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
@@ -121,7 +123,11 @@ onMounted(() => {
   // Auto-rotate every 5 seconds
   const autoRotateInterval = setInterval(() => {
     if (reviews.value.length > 1) {
+      console.log('⏱️ Auto-rotating carousel...');
+      console.log('   Current index before:', currentReviewIndex.value);
       nextReview()
+      console.log('   Current index after:', currentReviewIndex.value);
+      console.log('   Current review ID:', reviews.value[currentReviewIndex.value]?.id);
     }
   }, 5000)
 

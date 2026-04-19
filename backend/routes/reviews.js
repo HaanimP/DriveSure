@@ -56,12 +56,12 @@ router.get('/user/:userId', async (req, res) => {
     
     connection = await pool.getConnection();
     
-    // Get reviews for specific user
+    // Get reviews for specific user with explicit type casting
     const [reviews] = await connection.query(`
       SELECT 
         r.id,
-        r.rating as stars,
-        r.comment as text,
+        CAST(r.rating AS UNSIGNED) as stars,
+        COALESCE(r.comment, '') as text,
         COALESCE(u.first_name, 'Anonymous') as user_name,
         'Premium' as plan,
         r.customer_id,
@@ -147,12 +147,12 @@ router.get('/', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    // Join with users table to get user name, map database columns to frontend format
+    // Select explicitly with COALESCE for all fields to avoid NULL issues
     const [reviews] = await connection.query(`
       SELECT 
         r.id,
-        r.rating as stars,
-        r.comment as text,
+        CAST(r.rating AS UNSIGNED) as stars,
+        COALESCE(r.comment, '') as text,
         COALESCE(u.first_name, 'Anonymous') as user_name,
         'Premium' as plan,
         r.customer_id,
@@ -163,9 +163,10 @@ router.get('/', async (req, res) => {
         r.created_at
       FROM reviews r
       LEFT JOIN users u ON r.customer_id = u.id
-      WHERE r.approved = 1 OR r.approved = true
+      WHERE r.approved = 1
       ORDER BY r.created_at DESC
     `);
+    
     console.log('✅ Query executed, found', reviews.length, 'reviews');
     console.log('📋 ALL REVIEWS:', JSON.stringify(reviews, null, 2));
     
@@ -193,12 +194,12 @@ router.get('/admin/all', async (req, res) => {
     
     connection = await pool.getConnection();
     
-    // Join with users table to get user name and request info
+    // Select explicitly with COALESCE for all fields to avoid NULL issues
     const [reviews] = await connection.query(`
       SELECT 
         r.id,
-        r.rating as stars,
-        r.comment as text,
+        CAST(r.rating AS UNSIGNED) as stars,
+        COALESCE(r.comment, '') as text,
         COALESCE(u.first_name, 'Anonymous') as user_name,
         'Premium' as plan,
         r.customer_id,
