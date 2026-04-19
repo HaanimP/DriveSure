@@ -24,8 +24,14 @@ if (connectionString) {
     password: url.password,
     database: url.pathname.substring(1),
     waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    connectionLimit: 20,
+    queueLimit: 5,
+    enableKeepAlive: true,
+    keepAliveInitialDelayMs: 0,
+    connectionTimeout: 10000,
+    waitForConnectionsMs: 5000,
+    enableTimeouts: true,
+    timezone: 'Z'
   };
 } else {
   console.log('🔗 Using individual environment variables');
@@ -42,8 +48,14 @@ if (connectionString) {
     password: getEnvValue('DB_PASSWORD'),
     database: getEnvValue('DB_NAME') || 'railway',
     waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    connectionLimit: 20,
+    queueLimit: 5,
+    enableKeepAlive: true,
+    keepAliveInitialDelayMs: 0,
+    connectionTimeout: 10000,
+    waitForConnectionsMs: 5000,
+    enableTimeouts: true,
+    timezone: 'Z'
   };
 }
 
@@ -51,33 +63,64 @@ console.log('📋 Database Config:', {
   host: poolConfig.host,
   port: poolConfig.port,
   user: poolConfig.user,
-  database: poolConfig.database
+  database: poolConfig.database,
+  connectionLimit: poolConfig.connectionLimit
 });
 
 const pool = mysql.createPool(poolConfig);
 
 // Handle pool connection errors
 pool.on('error', (err) => {
-  console.error('❌ Database pool error:', err.message);
+  console.error('❌ Database pool error:', err.code, err.message);
+});
+
+pool.on('connection', (connection) => {
+  connection.on('error', (err) => {
+    console.error('❌ Connection error:', err.code, err.message);
+  });
 });
 
 console.log('⏳ Testing database connection...');
-// Test connection on startup (non-blocking with timeout)
-const connectionTestTimeout = setTimeout(() => {
-  console.warn('⚠️  Database connection test timed out after 10 seconds');
-}, 10000);
+// Test connection on startup with proper error handling
+testConnection();
 
-pool.getConnection()
-  .then(conn => {
-    clearTimeout(connectionTestTimeout);
-    console.log('✅ Database connection successful!');
-    conn.release();
-  })
-  .catch(err => {
-    clearTimeout(connectionTestTimeout);
-    console.error('⚠️  Database connection failed:', err.message);
-    console.error('    Code:', err.code);
-    console.error('    Will attempt to reconnect when routes are called');
-  });
+async function testConnection() {
+  let connection;
+  try {
+    connection = await Promise.race([
+      pool.getConnection(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection test timeout after 5 seconds')), 5000)
+      )
+    ]);
+    
+    // Test with a simple query
+    const [result] = await Promise.race([
+      connection.query('SELECT 1 as test'),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query test timeout after 5 seconds')), 5000)
+      )
+    ]);
+    
+    console.log('✅ Database connection and query test successful!');
+    console.log('   Connected to:', poolConfig.host, ':', poolConfig.port);
+    console.log('   Database:', poolConfig.database);
+    connection.release();
+  } catch (err) {
+    console.error('❌ Database connection test failed:', err.message);
+    console.error('   Host:', poolConfig.host);
+    console.error('   Port:', poolConfig.port);
+    console.error('   Database:', poolConfig.database);
+    console.error('   Error Code:', err.code);
+    console.error('   Make sure mysql.railway.internal is accessible from this container');
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        // Ignore release errors
+      }
+    }
+  }
+}
 
 export default pool;

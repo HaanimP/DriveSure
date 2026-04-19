@@ -7,6 +7,7 @@ const router = express.Router();
 
 // Register
 router.post('/register', async (req, res) => {
+  let connection;
   try {
     const { first, last, email, phone, password } = req.body;
 
@@ -14,12 +15,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
     // Check if user exists
     const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
-      connection.release();
       return res.status(400).json({ error: 'Email already registered' });
     }
 
@@ -32,20 +32,27 @@ router.post('/register', async (req, res) => {
       [first, last, email, phone || '', hashedPassword, 'customer']
     );
 
-    connection.release();
-
     const user = { id: result.insertId, first, last, email, role: 'customer' };
     const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({ user, token });
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Register error:', error.message, error.code);
+    res.status(500).json({ error: 'Registration failed', code: error.code });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
+  let connection;
   try {
     const { email, password } = req.body;
 
@@ -53,11 +60,10 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     console.log(`[LOGIN] Querying user: ${email}`);
     
     const [users] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
-    connection.release();
 
     if (users.length === 0) {
       console.log(`[LOGIN] User not found: ${email}`);
@@ -81,9 +87,16 @@ router.post('/login', async (req, res) => {
     console.log(`[LOGIN] Login successful for: ${email}`);
     res.json({ user: userResponse, token });
   } catch (error) {
-    console.error('[LOGIN] Error:', error.message);
-    console.error('[LOGIN] Stack:', error.stack);
-    res.status(500).json({ error: 'Login failed', details: error.message });
+    console.error('[LOGIN] Error:', error.message, error.code);
+    res.status(500).json({ error: 'Login failed', code: error.code });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 

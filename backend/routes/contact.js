@@ -27,6 +27,7 @@ transporter.verify((error, success) => {
 
 // Submit contact form
 router.post('/', async (req, res) => {
+  let connection;
   try {
     const { name, email, subject, message } = req.body;
 
@@ -35,12 +36,11 @@ router.post('/', async (req, res) => {
     }
 
     // FIRST: Save message to database (most important)
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [result] = await connection.query(
       `INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)`,
       [name, email, subject, message]
     );
-    connection.release();
 
     console.log('✅ Contact message saved to database with ID:', result.insertId);
 
@@ -100,36 +100,59 @@ router.post('/', async (req, res) => {
     // Always return success to user (message saved to database)
     res.json({ id: result.insertId, message: 'Message sent successfully! We will contact you soon.' });
   } catch (error) {
-    console.error('❌ Contact form error:', error);
-    console.error('Full error:', error.message);
-    res.status(500).json({ error: 'Failed to submit contact form' });
+    console.error('❌ Contact form error:', error.message, error.code);
+    res.status(500).json({ error: 'Failed to submit contact form', code: error.code });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Get all messages (admin)
 router.get('/', async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [messages] = await connection.query('SELECT * FROM contact_messages ORDER BY created_at DESC');
-    connection.release();
     res.json(messages);
   } catch (error) {
     console.error('Get messages error:', error);
     res.status(500).json({ error: 'Failed to get messages' });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Delete contact message
 router.delete('/:id', async (req, res) => {
+  let connection;
   try {
     const { id } = req.params;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.query('DELETE FROM contact_messages WHERE id = ?', [id]);
-    connection.release();
     res.json({ message: 'Message deleted successfully' });
   } catch (error) {
     console.error('Delete message error:', error);
     res.status(500).json({ error: 'Failed to delete message' });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 

@@ -5,6 +5,7 @@ const router = express.Router();
 
 // Create review
 router.post('/', async (req, res) => {
+  let connection;
   try {
     const { userId, userName, stars, text, plan } = req.body;
     console.log('📝 Creating review with data:', { userId, userName, stars, text, plan });
@@ -14,7 +15,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [result] = await connection.query(
       `INSERT INTO reviews (user_id, user_name, stars, text, plan, approved)
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -22,72 +23,111 @@ router.post('/', async (req, res) => {
     );
 
     console.log('✅ Review created with ID:', result.insertId);
-    connection.release();
     res.json({ id: result.insertId, message: 'Review posted successfully' });
   } catch (error) {
-    console.error('❌ Create review error:', error);
-    res.status(500).json({ error: 'Failed to create review' });
+    console.error('❌ Create review error:', error.message, error.code);
+    res.status(500).json({ error: 'Failed to create review', code: error.code });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Get approved reviews
 router.get('/', async (req, res) => {
+  let connection;
   try {
     console.log('📊 GET /api/reviews called at', new Date().toISOString());
-    const connection = await pool.getConnection().catch(err => {
-      console.error('🔴 Failed to get connection:', err.message);
-      throw err;
-    });
+    
+    connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
+    
     const [reviews] = await connection.query('SELECT * FROM reviews WHERE approved = true ORDER BY created_at DESC');
     console.log('✅ Query executed, found', reviews.length, 'reviews');
-    connection.release();
+    
     res.json(reviews);
   } catch (error) {
-    console.error('❌ Get reviews error:', error.message);
+    console.error('❌ Get reviews error:', error.message, error.code);
     console.error('   Stack:', error.stack);
-    res.status(500).json({ error: 'Failed to get reviews', details: error.message });
+    res.status(500).json({ error: 'Failed to get reviews', code: error.code });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Get all reviews (admin)
 router.get('/admin/all', async (req, res) => {
+  let connection;
   try {
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     const [reviews] = await connection.query('SELECT * FROM reviews ORDER BY created_at DESC');
-    connection.release();
     res.json(reviews);
   } catch (error) {
     console.error('Get all reviews error:', error);
     res.status(500).json({ error: 'Failed to get reviews' });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Approve review
 router.put('/:id/approve', async (req, res) => {
+  let connection;
   try {
     const { id } = req.params;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.query('UPDATE reviews SET approved = true WHERE id = ?', [id]);
-    connection.release();
     res.json({ message: 'Review approved' });
   } catch (error) {
     console.error('Approve review error:', error);
     res.status(500).json({ error: 'Failed to approve review' });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
 // Delete review
 router.delete('/:id', async (req, res) => {
+  let connection;
   try {
     const { id } = req.params;
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.query('DELETE FROM reviews WHERE id = ?', [id]);
-    connection.release();
     res.json({ message: 'Review deleted' });
   } catch (error) {
     console.error('Delete review error:', error);
     res.status(500).json({ error: 'Failed to delete review' });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
   }
 });
 
