@@ -35,7 +35,7 @@ async function runMigration() {
     const reviewColumnNames = reviewColumns.map(col => col.COLUMN_NAME);
     console.log('📊 Reviews table columns:', reviewColumnNames.join(', '));
     
-    // Ensure all required columns exist
+    // Ensure all required columns exist with proper defaults
     const requiredReviewColumns = {
       'customer_id': 'INT DEFAULT NULL',
       'request_id': 'INT DEFAULT NULL',
@@ -62,24 +62,33 @@ async function runMigration() {
       }
     }
     
-    // Fix request_id to allow NULL if it doesn't
+    // Fix all columns to ensure they have defaults
     try {
       const [columnDetails] = await connection.query(`
-        SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT 
+        SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_TYPE
         FROM INFORMATION_SCHEMA.COLUMNS 
-        WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway' AND COLUMN_NAME = 'request_id'
+        WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway'
       `);
       
-      if (columnDetails.length > 0) {
-        const colInfo = columnDetails[0];
-        if (colInfo.IS_NULLABLE === 'NO') {
-          console.log('⚠️  request_id is NOT NULL, fixing to allow NULL...');
-          await connection.query(`ALTER TABLE reviews MODIFY COLUMN request_id INT DEFAULT NULL`);
-          console.log('✅ Modified request_id to allow NULL');
+      for (const col of columnDetails) {
+        if (col.IS_NULLABLE === 'NO' && col.COLUMN_DEFAULT === null) {
+          console.log(`⚠️  ${col.COLUMN_NAME} is NOT NULL without default, fixing...`);
+          try {
+            if (col.COLUMN_NAME.includes('id') || col.COLUMN_NAME === 'rating') {
+              await connection.query(`ALTER TABLE reviews MODIFY COLUMN ${col.COLUMN_NAME} ${col.COLUMN_TYPE} DEFAULT NULL`);
+            } else if (col.COLUMN_NAME.includes('approved')) {
+              await connection.query(`ALTER TABLE reviews MODIFY COLUMN ${col.COLUMN_NAME} ${col.COLUMN_TYPE} DEFAULT FALSE`);
+            } else if (col.COLUMN_NAME === 'comment') {
+              await connection.query(`ALTER TABLE reviews MODIFY COLUMN ${col.COLUMN_NAME} ${col.COLUMN_TYPE}`);
+            }
+            console.log(`✅ Fixed ${col.COLUMN_NAME}`);
+          } catch (err) {
+            console.log(`⚠️  Error fixing ${col.COLUMN_NAME}:`, err.message);
+          }
         }
       }
     } catch (err) {
-      console.log('⚠️  Error checking/fixing request_id:', err.message);
+      console.log('⚠️  Error checking column defaults:', err.message);
     }
     
     console.log('✅ Reviews table schema verified');
