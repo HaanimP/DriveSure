@@ -7,7 +7,12 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config({ path: join(__dirname, '.env') });
+// Load .env.railway if it exists, otherwise use system env vars
+try {
+  dotenv.config({ path: join(__dirname, '.env.railway') });
+} catch (e) {
+  console.log('⚠️  .env.railway not found, using system environment variables');
+}
 
 // Helper to get env value and remove quotes
 const getEnvValue = (key) => {
@@ -15,13 +20,24 @@ const getEnvValue = (key) => {
   return value.replace(/^["']|["']$/g, '');
 };
 
-// Create pool with current environment credentials
+// Create pool with Railway credentials
+const railwayDbHost = getEnvValue('DB_HOST') || 'mysql.railway.internal';
+const railwayDbPort = parseInt(getEnvValue('DB_PORT')) || 3306;
+const railwayDbUser = getEnvValue('DB_USER') || 'root';
+const railwayDbPassword = getEnvValue('DB_PASSWORD');
+const railwayDbName = getEnvValue('DB_NAME') || 'railway';
+
+console.log(`🚂 Connecting to Railway production database:`);
+console.log(`   Host: ${railwayDbHost}`);
+console.log(`   Port: ${railwayDbPort}`);
+console.log(`   Database: ${railwayDbName}`);
+
 const pool = mysql.createPool({
-  host: getEnvValue('DB_HOST') || 'localhost',
-  port: parseInt(getEnvValue('DB_PORT')) || 3306,
-  user: getEnvValue('DB_USER') || 'root',
-  password: getEnvValue('DB_PASSWORD'),
-  database: getEnvValue('DB_NAME') || 'drivesure',
+  host: railwayDbHost,
+  port: railwayDbPort,
+  user: railwayDbUser,
+  password: railwayDbPassword,
+  database: railwayDbName,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -49,10 +65,6 @@ const SEED_USERS = [
 
 async function seedDatabase() {
   try {
-    console.log('🌱 Starting database seeding...');
-    console.log(`📍 Database: ${getEnvValue('DB_NAME') || 'drivesure'}`);
-    console.log(`🖥️  Host: ${getEnvValue('DB_HOST') || 'localhost'}`);
-    
     const connection = await pool.getConnection();
 
     for (const user of SEED_USERS) {
@@ -68,7 +80,7 @@ async function seedDatabase() {
           // Update existing user with new password (hash it first)
           const hashedPassword = await bcrypt.hash(user.password, 10);
           await connection.query(
-            'UPDATE users SET password = ?, phone = ? WHERE email = ?',
+            'UPDATE users SET password_hash = ?, phone = ? WHERE email = ?',
             [hashedPassword, user.phone, user.email]
           );
           console.log(`✅ Updated ${user.email}`);
@@ -78,7 +90,7 @@ async function seedDatabase() {
           const hashedPassword = await bcrypt.hash(user.password, 10);
           
           await connection.query(
-            'INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO users (first_name, last_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
             [user.first_name, user.last_name, user.email, user.phone, hashedPassword, user.role]
           );
           console.log(`✅ Created ${user.email} as ${user.role}`);
@@ -89,7 +101,7 @@ async function seedDatabase() {
     }
 
     connection.release();
-    console.log('\n✨ Database seeding completed!');
+    console.log('\n✨ Railway database seeding completed!');
     console.log('\n📋 Seeded Users:');
     console.log('─'.repeat(60));
     console.log('ADMIN:');
