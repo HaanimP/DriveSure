@@ -12,13 +12,13 @@
         <div v-if="reviews.length > 0" class="carousel-container">
           <div class="reviews-carousel">
             <div v-for="(review, index) in reviews" 
-                 :key="`review-${review.id}`"
+                 :key="`review-${review.id}-${index}`"
                  class="review-card"
                  :class="{ active: index === currentReviewIndex }"
                  :data-review-id="review.id"
                  :data-review-index="index"
                  :data-is-active="index === currentReviewIndex"
-                 @mounted="console.log('🎴 Review card mounted:', review.id)">
+                 :data-current-index="currentReviewIndex">
               <div class="review-content">
                 <div class="stars">
                   <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
@@ -245,15 +245,19 @@ const goToReviewForm = () => {
   border-radius: 16px;
   padding: 2rem;
   opacity: 0;
-  transform: translateX(50px);
+  transform: translateX(50px) scale(0.95);
   transition: all 0.5s ease;
   pointer-events: none;
+  visibility: hidden;
+  z-index: 0;
 }
 
 .review-card.active {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
   pointer-events: auto;
+  visibility: visible;
+  z-index: 10;
 }
 
 .review-content {
