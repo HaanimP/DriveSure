@@ -39,17 +39,24 @@ const pool = mysql.createPool(poolConfig);
 
 // Handle pool connection errors
 pool.on('error', (err) => {
-  console.error('❌ Database pool error:', err);
+  console.error('❌ Database pool error:', err.message);
 });
 
-// Test connection on startup
+// Test connection on startup (non-blocking with timeout)
+const connectionTestTimeout = setTimeout(() => {
+  console.warn('⚠️  Database connection test timed out (will retry on demand)');
+}, 5000);
+
 pool.getConnection()
   .then(conn => {
+    clearTimeout(connectionTestTimeout);
     console.log('✅ Database connection successful');
     conn.release();
   })
   .catch(err => {
-    console.error('⚠️  Database connection failed (will retry on demand):', err.message);
+    clearTimeout(connectionTestTimeout);
+    console.error('⚠️  Database connection failed on startup:', err.message);
+    console.log('   Will attempt to reconnect when needed');
   });
 
 export default pool;

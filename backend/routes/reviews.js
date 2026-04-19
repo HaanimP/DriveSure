@@ -34,7 +34,10 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     console.log('📊 GET /api/reviews called at', new Date().toISOString());
-    const connection = await pool.getConnection();
+    const connection = await pool.getConnection().catch(err => {
+      console.error('🔴 Failed to get connection:', err.message);
+      throw err;
+    });
     console.log('✅ Database connection obtained');
     const [reviews] = await connection.query('SELECT * FROM reviews WHERE approved = true ORDER BY created_at DESC');
     console.log('✅ Query executed, found', reviews.length, 'reviews');
@@ -42,7 +45,8 @@ router.get('/', async (req, res) => {
     res.json(reviews);
   } catch (error) {
     console.error('❌ Get reviews error:', error.message);
-    res.status(500).json({ error: 'Failed to get reviews' });
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to get reviews', details: error.message });
   }
 });
 
