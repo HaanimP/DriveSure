@@ -195,21 +195,22 @@ const fetchUserReviews = async () => {
     loadingReviews.value = true
     const userData = JSON.parse(localStorage.getItem('driveSureUser') || '{}')
     if (!userData.id) {
-      console.log('No user ID found')
+      console.log('⚠️ No user ID found')
       return
     }
     
-    // Get all reviews and filter for current user
-    const response = await apiClient.get('/reviews/admin/all')
-    const allReviews = Array.isArray(response) ? response : response.reviews || []
-    console.log('📊 All reviews fetched:', allReviews)
-    console.log('👤 Current user ID:', userData.id)
+    console.log('📊 Fetching reviews for user:', userData.id)
     
-    // Filter by customer_id (not user_id, as the API returns customer_id)
-    userReviews.value = allReviews.filter(r => r.customer_id === userData.id)
-    console.log('✅ User reviews:', userReviews.value)
+    // Fetch user's specific reviews from new endpoint
+    const response = await apiClient.get(`/reviews/user/${userData.id}`)
+    console.log('📊 API Response:', response)
+    
+    const allReviews = Array.isArray(response) ? response : response.reviews || []
+    console.log('✅ User reviews received:', allReviews)
+    
+    userReviews.value = allReviews
   } catch (error) {
-    console.error('Error fetching user reviews:', error)
+    console.error('❌ Error fetching user reviews:', error)
   } finally {
     loadingReviews.value = false
   }

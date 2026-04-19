@@ -47,6 +47,53 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Get user's own reviews (customer dashboard)
+router.get('/user/:userId', async (req, res) => {
+  let connection;
+  try {
+    const { userId } = req.params;
+    console.log('📊 GET /api/reviews/user/:userId called with userId:', userId);
+    
+    connection = await pool.getConnection();
+    
+    // Get reviews for specific user
+    const [reviews] = await connection.query(`
+      SELECT 
+        r.id,
+        r.rating as stars,
+        r.comment as text,
+        COALESCE(u.first_name, 'Anonymous') as user_name,
+        'Premium' as plan,
+        r.customer_id,
+        r.request_id,
+        r.agent_id,
+        r.is_approved,
+        r.approved,
+        r.created_at
+      FROM reviews r
+      LEFT JOIN users u ON r.customer_id = u.id
+      WHERE r.customer_id = ?
+      ORDER BY r.created_at DESC
+    `, [userId]);
+    
+    console.log('✅ User reviews query executed, found', reviews.length, 'reviews for user', userId);
+    console.log('📋 Reviews:', reviews);
+    
+    res.json(reviews);
+  } catch (error) {
+    console.error('❌ Get user reviews error:', error.message);
+    res.status(500).json({ error: 'Failed to get user reviews', details: error.message });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
+  }
+});
+
 // Get approved reviews
 router.get('/', async (req, res) => {
   let connection;
