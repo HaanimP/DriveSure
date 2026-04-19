@@ -68,7 +68,7 @@ async function seedDatabase() {
           // Update existing user with new password (hash it first)
           const hashedPassword = await bcrypt.hash(user.password, 10);
           await connection.query(
-            'UPDATE users SET password = ?, phone = ? WHERE email = ?',
+            'UPDATE users SET password_hash = ?, phone = ? WHERE email = ?',
             [hashedPassword, user.phone, user.email]
           );
           console.log(`✅ Updated ${user.email}`);
@@ -78,7 +78,7 @@ async function seedDatabase() {
           const hashedPassword = await bcrypt.hash(user.password, 10);
           
           await connection.query(
-            'INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO users (first_name, last_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
             [user.first_name, user.last_name, user.email, user.phone, hashedPassword, user.role]
           );
           console.log(`✅ Created ${user.email} as ${user.role}`);

@@ -9,6 +9,7 @@
     "dev": "node --watch server.js",
     "seed": "node seed.js",
     "seed:railway": "node seed-railway.js",
+    "migrate": "node migrate-production.js",
     "diagnose": "node diagnose.js"
   },
   "dependencies": {
