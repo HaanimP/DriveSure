@@ -25,13 +25,7 @@ if (connectionString) {
     database: url.pathname.substring(1),
     waitForConnections: true,
     connectionLimit: 20,
-    queueLimit: 5,
-    enableKeepAlive: true,
-    keepAliveInitialDelayMs: 0,
-    connectionTimeout: 10000,
-    waitForConnectionsMs: 5000,
-    enableTimeouts: true,
-    timezone: 'Z'
+    queueLimit: 5
   };
 } else {
   console.log('🔗 Using individual environment variables');
@@ -49,13 +43,7 @@ if (connectionString) {
     database: getEnvValue('DB_NAME') || 'railway',
     waitForConnections: true,
     connectionLimit: 20,
-    queueLimit: 5,
-    enableKeepAlive: true,
-    keepAliveInitialDelayMs: 0,
-    connectionTimeout: 10000,
-    waitForConnectionsMs: 5000,
-    enableTimeouts: true,
-    timezone: 'Z'
+    queueLimit: 5
   };
 }
 
