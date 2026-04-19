@@ -3,18 +3,18 @@
     <div class="hero-stripes"></div>
     <div class="hero-cars"></div>
     <div class="hero-content">
-      <div class="hero-badge">Trusted Vehicle Sourcing</div>
+      <div class="hero-badge">🚗 Trusted Vehicle Sourcing</div>
       <h1>Find Your Perfect <span>Drive</span></h1>
-      <p class="hero-tagline">Professional vehicle sourcing and after-sales support</p>
-      <p class="hero-description">Where quality meets reliability. Get access to premium vehicles and expert guidance all in one platform.</p>
+      <p class="hero-tagline">Where Dreams Meet the Road</p>
+      <p>Professional vehicle sourcing and after-sales support all in one place</p>
       <div class="hero-btns">
         <button class="btn-primary" @click="$emit('login')">Get Started</button>
-        <button class="btn-secondary" @click="scrollToContact">Learn More</button>
+        <button class="btn-secondary" @click="scrollToContact">Contact</button>
       </div>
     </div>
     <div class="scroll-indicator">
-      <span>SCROLL TO EXPLORE</span>
-      <div class="scroll-arrow"></div>
+      <span>SCROLL</span>
+      <div class="scroll-arrow">↓</div>
     </div>
   </div>
 </template>

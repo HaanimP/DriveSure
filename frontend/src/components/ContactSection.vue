@@ -8,7 +8,7 @@
             <p style="margin-bottom: 2rem; color: rgba(255,255,255,0.75);">Have questions? Our team is here to help you find the perfect vehicle.</p>
             
             <div class="contact-item">
-              <div class="contact-icon">☎</div>
+              <div class="contact-icon">📞</div>
               <div>
                 <strong>Phone</strong>
                 <p>+27 839 958 822</p>
@@ -16,7 +16,7 @@
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">✉</div>
+              <div class="contact-icon">📧</div>
               <div>
                 <strong>Email</strong>
                 <p>drivesure13@gmail.com</p>
@@ -24,7 +24,7 @@
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">◆</div>
+              <div class="contact-icon">📍</div>
               <div>
                 <strong>Address</strong>
                 <p>Cape Town, South Africa</p>
@@ -32,7 +32,7 @@
             </div>
 
             <div class="contact-item">
-              <div class="contact-icon">◐</div>
+              <div class="contact-icon">⏰</div>
               <div>
                 <strong>Business Hours</strong>
                 <p>Monday - Friday: 09:00 - 16:00<br>Saturday: 09:00 - 12:00</p>

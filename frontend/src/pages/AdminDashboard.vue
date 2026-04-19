@@ -18,7 +18,7 @@
       <div class="stats-container">
         <div class="stat-card requests">
           <div class="stat-header">
-            <div class="stat-icon">◆</div>
+            <div class="stat-icon">📋</div>
             <div class="stat-title">Requests</div>
           </div>
           <div class="stat-main-number">{{ allRequests.length }}</div>
@@ -30,7 +30,7 @@
 
         <div class="stat-card users">
           <div class="stat-header">
-            <div class="stat-icon">○</div>
+            <div class="stat-icon">👥</div>
             <div class="stat-title">Users</div>
           </div>
           <div class="stat-main-number">{{ allUsers.length }}</div>
@@ -42,7 +42,7 @@
 
         <div class="stat-card reviews">
           <div class="stat-header">
-            <div class="stat-icon">★</div>
+            <div class="stat-icon">⭐</div>
             <div class="stat-title">Reviews</div>
           </div>
           <div class="stat-main-number">{{ allReviews.length }}</div>
@@ -55,13 +55,13 @@
 
       <!-- Requests Section -->
       <div class="requests-section">
-        <h2>All Requests</h2>
+        <h2>📋 All Requests</h2>
         <p class="section-subtitle">{{ allRequests.length }} total request(s)</p>
 
         <div v-if="loadingRequests" class="loading">Loading requests...</div>
         
         <div v-else-if="allRequests.length === 0" class="empty-state">
-          <div class="empty-state-icon">─</div>
+          <div class="empty-state-icon">📭</div>
           <h3>No Requests</h3>
           <p>No customer requests yet</p>
         </div>
@@ -145,13 +145,13 @@
 
       <!-- Reviews Section -->
       <div class="requests-section">
-        <h2>Customer Reviews</h2>
+        <h2>⭐ Customer Reviews</h2>
         <p class="section-subtitle">{{ allReviews.length }} total review(s)</p>
 
         <div v-if="loadingReviews" class="loading">Loading reviews...</div>
         
         <div v-else-if="allReviews.length === 0" class="empty-state">
-          <div class="empty-state-icon">★</div>
+          <div class="empty-state-icon">⭐</div>
           <h3>No Reviews</h3>
           <p>No customer reviews yet</p>
         </div>
@@ -165,7 +165,7 @@
               </div>
               <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <div class="stars">
-                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">★</span>
+                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
                 </div>
                 <button 
                   @click="deleteReview(review.id)" 
@@ -191,13 +191,13 @@
 
       <!-- Contact Messages Section -->
       <div class="requests-section">
-        <h2>Contact Messages</h2>
+        <h2>💬 Contact Messages</h2>
         <p class="section-subtitle">{{ allContactMessages.length }} total message(s)</p>
 
         <div v-if="loadingMessages" class="loading">Loading messages...</div>
         
         <div v-else-if="allContactMessages.length === 0" class="empty-state">
-          <div class="empty-state-icon">✉</div>
+          <div class="empty-state-icon">📭</div>
           <h3>No Messages</h3>
           <p>No contact messages yet</p>
         </div>
