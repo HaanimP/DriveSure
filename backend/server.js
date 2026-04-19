@@ -72,8 +72,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Drive Sure Backend running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Drive Sure Backend running on 0.0.0.0:${PORT}`);
   console.log(`✅ CORS enabled for: https://drive-sure-lyart.vercel.app`);
 });
 
