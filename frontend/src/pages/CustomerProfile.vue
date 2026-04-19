@@ -988,18 +988,38 @@ body.dark-mode .review-card .review-plan {
   opacity: 1;
 }
 
+@media (max-width: 1024px) {
+  .profile-header {
+    padding: 1.5rem;
+  }
+
+  .profile-content {
+    gap: 20px;
+  }
+
+  .profile-picture {
+    width: 140px;
+    height: 140px;
+  }
+}
+
 @media (max-width: 768px) {
   .profile-container {
-    padding-top: 60px;
+    padding: 0.75rem;
+    padding-top: 75px;
   }
 
   .profile-header {
-    padding: 30px 15px;
+    padding: 1.25rem;
+    flex-direction: column;
+    text-align: center;
   }
 
   .profile-content {
     flex-direction: column;
     text-align: center;
+    gap: 1rem;
+    align-items: center;
   }
 
   .profile-picture {
@@ -1008,20 +1028,98 @@ body.dark-mode .review-card .review-plan {
   }
 
   .profile-info h1 {
-    font-size: 24px;
+    font-size: 1.5rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .profile-info p {
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
   }
 
   .profile-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    gap: 5px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .items-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 0.5rem;
+    padding-top: 65px;
+  }
+
+  .profile-header {
+    padding: 1rem;
+  }
+
+  .profile-content {
+    gap: 0.75rem;
+  }
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-info h1 {
+    font-size: 1.3rem;
+  }
+
+  .profile-tabs {
+    display: flex;
+    gap: 2px;
+  }
+
+  .profile-tab {
+    flex: 1;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .form-grid {
+    gap: 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 0.6rem;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .items-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .stats-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .stats-section h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
   }
 }
 </style>
