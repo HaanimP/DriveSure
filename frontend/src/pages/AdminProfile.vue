@@ -371,6 +371,14 @@ const fetchUserData = async () => {
     const token = localStorage.getItem('token');
     
     console.log('👤 AdminProfile: Fetching data for user ID:', storedUser.id);
+    console.log('   Token available:', token ? `✅ Yes (${token.substring(0, 30)}...)` : '❌ MISSING!');
+    
+    if (!token) {
+      console.error('❌ ERROR: No token found in localStorage!');
+      showMessage('Authentication error: No token found. Please log in again.', 'error');
+      setTimeout(() => router.push('/'), 2000);
+      return;
+    }
 
     // Fetch admin profile
     console.log('🔄 Fetching admin profile from /api/profile/' + storedUser.id);
