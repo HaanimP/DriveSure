@@ -49,7 +49,17 @@ async function runMigration() {
       WHERE TABLE_NAME = 'requests' AND TABLE_SCHEMA = 'railway'
     `);
     
+    console.log('📊 Existing requests columns:', requestColumns.map(c => c.COLUMN_NAME).join(', '));
     const requestColumnNames = requestColumns.map(col => col.COLUMN_NAME);
+    
+    // Check column details
+    const [columnDetails] = await connection.query(`
+      SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_NAME = 'requests' AND TABLE_SCHEMA = 'railway' 
+      AND COLUMN_NAME IN ('customer_id', 'user_id')
+    `);
+    console.log('📋 Customer/User ID column details:', JSON.stringify(columnDetails, null, 2));
     
     // Check if we need to rename customer_id to user_id
     if (requestColumnNames.includes('customer_id') && !requestColumnNames.includes('user_id')) {
