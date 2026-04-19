@@ -52,14 +52,13 @@ async function runMigration() {
     console.log('📊 Existing requests columns:', requestColumns.map(c => c.COLUMN_NAME).join(', '));
     const requestColumnNames = requestColumns.map(col => col.COLUMN_NAME);
     
-    // Check column details
+    // Check column details for all columns
     const [columnDetails] = await connection.query(`
       SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT 
       FROM INFORMATION_SCHEMA.COLUMNS 
-      WHERE TABLE_NAME = 'requests' AND TABLE_SCHEMA = 'railway' 
-      AND COLUMN_NAME IN ('customer_id', 'user_id')
+      WHERE TABLE_NAME = 'requests' AND TABLE_SCHEMA = 'railway'
     `);
-    console.log('📋 Customer/User ID column details:', JSON.stringify(columnDetails, null, 2));
+    console.log('📋 All requests columns details:', JSON.stringify(columnDetails, null, 2));
     
     // Check if we need to rename customer_id to user_id
     if (requestColumnNames.includes('customer_id') && !requestColumnNames.includes('user_id')) {
@@ -76,8 +75,8 @@ async function runMigration() {
     
     // Check and add missing columns
     const requiredColumns = {
-      'customer_id': 'INT',
-      'user_id': 'INT',
+      'customer_id': 'INT DEFAULT NULL',
+      'user_id': 'INT DEFAULT NULL',
       'car_type': 'VARCHAR(100)',
       'make': 'VARCHAR(100)',
       'budget_min': 'INT',
@@ -100,6 +99,24 @@ async function runMigration() {
           console.log(`✅ Added ${colName} column to requests table`);
         } catch (err) {
           console.log(`⚠️  Could not add ${colName}:`, err.message);
+        }
+      } else {
+        // Column exists - check if it needs a default value
+        const columnInfo = columnDetails.find(c => c.COLUMN_NAME === colName);
+        if (columnInfo && columnInfo.COLUMN_DEFAULT === null && columnInfo.IS_NULLABLE === 'NO') {
+          // Column exists but has no default and is NOT NULL - add a default
+          console.log(`⚠️  Fixing ${colName} column - adding default value`);
+          try {
+            if (colName === 'customer_id' || colName === 'user_id') {
+              await connection.query(`ALTER TABLE requests MODIFY COLUMN ${colName} INT DEFAULT NULL`);
+              console.log(`✅ Modified ${colName} to allow NULL`);
+            } else {
+              await connection.query(`ALTER TABLE requests MODIFY COLUMN ${colName} ${colType}`);
+              console.log(`✅ Modified ${colName} with default`);
+            }
+          } catch (err) {
+            console.log(`⚠️  Could not modify ${colName}:`, err.message);
+          }
         }
       }
     }

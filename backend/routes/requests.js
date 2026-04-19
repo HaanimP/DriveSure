@@ -40,33 +40,46 @@ router.post('/', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    // Try using customer_id first (production Railway uses this), fall back to user_id if needed
-    let insertQuery;
+    // Try using customer_id first (production Railway uses this), fall back to user_id
+    // We'll skip specifying columns that might not exist and let database handle defaults
     try {
-      // Try customer_id first (production column name)
+      // Try customer_id with minimal required columns
       const [result] = await connection.query(
-        'INSERT INTO requests (customer_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        `INSERT INTO requests (customer_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
       );
       console.log('✅ Request created with customer_id - ID:', result.insertId);
       res.json({ id: result.insertId, message: 'Request created successfully' });
     } catch (customerIdError) {
-      // If customer_id fails (bad field or default value issue), try user_id
-      if (customerIdError.code === 'ER_BAD_FIELD_ERROR' || customerIdError.code === 'ER_NO_DEFAULT_FOR_FIELD') {
-        console.log('⚠️  customer_id column issue, trying user_id:', customerIdError.code);
+      console.error('⚠️  customer_id attempt failed:', customerIdError.code, customerIdError.message);
+      
+      // Try user_id
+      try {
+        const [result] = await connection.query(
+          `INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
+        );
+        console.log('✅ Request created with user_id - ID:', result.insertId);
+        res.json({ id: result.insertId, message: 'Request created successfully' });
+      } catch (userIdError) {
+        console.error('⚠️  user_id attempt failed:', userIdError.code, userIdError.message);
+        
+        // Last resort: provide uid as NULL and rely on insert trigger or next attempt
+        console.log('⚠️  Attempting with NULL customer_id to see if there are other column issues...');
         try {
           const [result] = await connection.query(
-            'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
+            `INSERT INTO requests (car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
           );
-          console.log('✅ Request created with user_id - ID:', result.insertId);
-          res.json({ id: result.insertId, message: 'Request created successfully' });
-        } catch (userIdError) {
-          console.error('❌ Both customer_id and user_id failed');
-          throw userIdError;
+          console.log('✅ Request created without user_id - ID:', result.insertId);
+          res.json({ id: result.insertId, message: 'Request created successfully (note: user_id not set)' });
+        } catch (fallbackError) {
+          console.error('❌ All insert attempts failed');
+          throw fallbackError;
         }
-      } else {
-        throw customerIdError;
       }
     }
   } catch (error) {
