@@ -16,11 +16,12 @@ if (!MYSQL_URL) {
   process.exit(1);
 }
 
-async function migrate() {
+async function runMigration() {
   let connection;
+  let pool;
   try {
     console.log('🔗 Connecting to Railway MySQL...');
-    const pool = mysql.createPool(MYSQL_URL);
+    pool = mysql.createPool(MYSQL_URL);
     connection = await pool.getConnection();
     
     console.log('✅ Connected to database');
@@ -110,7 +111,9 @@ async function migrate() {
     console.log(`  Password: ${adminPassword}`);
     
     connection.release();
-    process.exit(0);
+    if (pool) {
+      await pool.end();
+    }
   } catch (error) {
     console.error('❌ Migration failed:', error.message);
     if (connection) {
@@ -120,8 +123,26 @@ async function migrate() {
         // Ignore
       }
     }
-    process.exit(1);
+    if (pool) {
+      try {
+        await pool.end();
+      } catch (e) {
+        // Ignore
+      }
+    }
+    throw error;
   }
 }
 
-migrate();
+async function migrate() {
+  await runMigration();
+  process.exit(0);
+}
+
+// Export for use in server.js
+export { runMigration };
+
+// If run directly, execute migration
+if (import.meta.url === `file://${process.argv[1]}`) {
+  migrate();
+}

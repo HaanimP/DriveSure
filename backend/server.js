@@ -9,6 +9,7 @@ import reviewRoutes from './routes/reviews.js';
 import contactRoutes from './routes/contact.js';
 import profileRoutes from './routes/profile.js';
 import usersRoutes from './routes/users.js';
+import { runMigration } from './migrate-production.js';
 
 dotenv.config();
 
@@ -80,6 +81,12 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Drive Sure Backend running on 0.0.0.0:${PORT}`);
   console.log(`✅ CORS enabled for: https://drive-sure-lyart.vercel.app`);
+  
+  // Run migrations on startup
+  console.log('\n📋 Running database migrations...');
+  runMigration().catch(err => {
+    console.error('⚠️  Migration warning (non-blocking):', err.message);
+  });
 });
 
 export { pool };
