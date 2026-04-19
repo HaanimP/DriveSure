@@ -1,7 +1,7 @@
 <template>
   <div class="landing">
     <hero-section @login="$emit('login')" />
-    <plans-section @select-plan="selectPlan" />
+    <plans-section @login="$emit('login')" @select-plan="selectPlan" />
     <reviews-section />
     <contact-section />
   </div>

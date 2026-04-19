@@ -1,13 +1,13 @@
 <template>
   <section class="plans-bg" id="plans">
     <div class="container">
-      <div class="section-tag">💎 FLEXIBLE PLANS</div>
+      <div class="section-tag">FLEXIBLE PLANS</div>
       <div class="section-divider"></div>
       <h2 class="section-title">Choose Your Plan</h2>
       <p class="section-sub">Select the perfect vehicle sourcing plan for your needs</p>
 
       <div class="payment-notice">
-        <strong>💳 Payment Required:</strong> All plans require payment before service begins. We accept bank transfers with secure verification. Your service starts immediately upon payment confirmation.
+        <strong>Payment Required:</strong> All plans require payment before service begins. We accept bank transfers with secure verification. Your service starts immediately upon payment confirmation.
       </div>
 
       <div class="plans-grid">
@@ -66,12 +66,28 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 export default {
-  setup() {
+  emits: ['login'],
+  setup(props, { emit }) {
     const router = useRouter()
 
+    const getAuthToken = () => {
+      return localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
+    }
+
     const selectPlan = (planName) => {
+      // Check if user is authenticated
+      const token = getAuthToken()
+      
+      if (!token) {
+        // User not signed in - emit login event to show modal
+        emit('login')
+        return
+      }
+
+      // User is authenticated - proceed with plan selection
       sessionStorage.setItem('selectedPlan', planName)
       router.push('/payment')
     }
