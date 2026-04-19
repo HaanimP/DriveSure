@@ -94,6 +94,50 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
+// Debug endpoint - show all reviews with all columns
+router.get('/debug/all', async (req, res) => {
+  let connection;
+  try {
+    console.log('🔍 DEBUG /api/reviews/debug/all called');
+    
+    connection = await pool.getConnection();
+    
+    // Get ALL data from reviews table with all columns
+    const [reviews] = await connection.query(`
+      SELECT * FROM reviews
+    `);
+    
+    // Also get column info
+    const [columns] = await connection.query(`
+      SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway'
+      ORDER BY ORDINAL_POSITION
+    `);
+    
+    console.log('🔍 DEBUG: Found', reviews.length, 'reviews total');
+    console.log('🔍 DEBUG: Reviews data:', JSON.stringify(reviews, null, 2));
+    
+    res.json({ 
+      total: reviews.length,
+      reviews: reviews,
+      schema: columns,
+      message: 'This is debug data - includes all reviews regardless of approval status'
+    });
+  } catch (error) {
+    console.error('❌ Debug endpoint error:', error.message);
+    res.status(500).json({ error: 'Failed to get debug data', details: error.message });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (e) {
+        console.error('Error releasing connection:', e.message);
+      }
+    }
+  }
+});
+
 // Get approved reviews
 router.get('/', async (req, res) => {
   let connection;
