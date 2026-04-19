@@ -16,14 +16,31 @@ router.post('/', async (req, res) => {
     }
 
     connection = await pool.getConnection();
-    const [result] = await connection.query(
-      `INSERT INTO reviews (user_id, user_name, stars, text, plan, approved)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, userName, stars, text, plan || '', true]
-    );
-
-    console.log('✅ Review created with ID:', result.insertId);
-    res.json({ id: result.insertId, message: 'Review posted successfully' });
+    
+    // Try customer_id first (production), then user_id
+    try {
+      const [result] = await connection.query(
+        `INSERT INTO reviews (customer_id, user_name, stars, text, plan, approved)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [userId, userName, stars, text, plan || '', true]
+      );
+      console.log('✅ Review created with customer_id - ID:', result.insertId);
+      res.json({ id: result.insertId, message: 'Review posted successfully' });
+    } catch (customerIdError) {
+      // Try user_id
+      if (customerIdError.code === 'ER_BAD_FIELD_ERROR') {
+        console.log('⚠️  customer_id not found, trying user_id:', customerIdError.code);
+        const [result] = await connection.query(
+          `INSERT INTO reviews (user_id, user_name, stars, text, plan, approved)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [userId, userName, stars, text, plan || '', true]
+        );
+        console.log('✅ Review created with user_id - ID:', result.insertId);
+        res.json({ id: result.insertId, message: 'Review posted successfully' });
+      } else {
+        throw customerIdError;
+      }
+    }
   } catch (error) {
     console.error('❌ Create review error:', error.message, error.code);
     res.status(500).json({ error: 'Failed to create review', code: error.code });

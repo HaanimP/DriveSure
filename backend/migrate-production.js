@@ -42,6 +42,26 @@ async function runMigration() {
       }
     }
     
+    // 1a. Ensure reviews table has customer_id support
+    const [reviewColumns] = await connection.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway'
+    `);
+    const reviewColumnNames = reviewColumns.map(col => col.COLUMN_NAME);
+    
+    // Check if we need to add customer_id
+    if (!reviewColumnNames.includes('customer_id') && reviewColumnNames.includes('user_id')) {
+      console.log('📋 Reviews table has user_id, creating alias column customer_id...');
+      try {
+        await connection.query(`ALTER TABLE reviews ADD COLUMN customer_id INT`);
+        console.log('✅ Added customer_id column to reviews table');
+      } catch (err) {
+        if (err.code === 'ER_DUP_FIELDNAME') {
+          console.log('✅ customer_id column already exists in reviews');
+        }
+      }
+    }
+    
     // 1b. Fix requests table - ensure it has all required columns
     console.log('\n📋 Checking requests table schema...');
     const [requestColumns] = await connection.query(`

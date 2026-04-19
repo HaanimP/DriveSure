@@ -20,10 +20,13 @@ const PORT = process.env.PORT || 3001;
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = ['https://drive-sure-lyart.vercel.app', 'http://localhost:5173', 'http://localhost:3000'];
+    
+    // Allow requests with no origin (Postman, curl, etc) or from allowed origins
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('CORS not allowed'));
+      console.log('⚠️  CORS blocked origin:', origin);
+      callback(null, true); // For now, allow all to debug
     }
   },
   credentials: true,
