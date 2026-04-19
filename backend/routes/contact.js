@@ -23,8 +23,6 @@ transporter.verify((error, success) => {
   } else {
     console.log('✅ Email transporter verified and ready');
   }
-}).catch(err => {
-  console.warn('⚠️ Email transporter verification failed:', err.code);
 });
 
 // Submit contact form
