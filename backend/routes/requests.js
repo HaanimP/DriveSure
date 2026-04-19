@@ -51,15 +51,20 @@ router.post('/', async (req, res) => {
       console.log('✅ Request created with customer_id - ID:', result.insertId);
       res.json({ id: result.insertId, message: 'Request created successfully' });
     } catch (customerIdError) {
-      // If customer_id fails, try user_id
-      if (customerIdError.code === 'ER_BAD_FIELD_ERROR') {
-        console.log('⚠️  customer_id column not available, trying user_id:', customerIdError.code);
-        const [result] = await connection.query(
-          'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
-        );
-        console.log('✅ Request created with user_id - ID:', result.insertId);
-        res.json({ id: result.insertId, message: 'Request created successfully' });
+      // If customer_id fails (bad field or default value issue), try user_id
+      if (customerIdError.code === 'ER_BAD_FIELD_ERROR' || customerIdError.code === 'ER_NO_DEFAULT_FOR_FIELD') {
+        console.log('⚠️  customer_id column issue, trying user_id:', customerIdError.code);
+        try {
+          const [result] = await connection.query(
+            'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
+          );
+          console.log('✅ Request created with user_id - ID:', result.insertId);
+          res.json({ id: result.insertId, message: 'Request created successfully' });
+        } catch (userIdError) {
+          console.error('❌ Both customer_id and user_id failed');
+          throw userIdError;
+        }
       } else {
         throw customerIdError;
       }

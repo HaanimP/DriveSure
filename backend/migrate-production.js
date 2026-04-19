@@ -66,8 +66,8 @@ async function runMigration() {
     
     // Check and add missing columns
     const requiredColumns = {
-      'user_id': 'INT NOT NULL',
-      'customer_id': 'INT NOT NULL',
+      'customer_id': 'INT',
+      'user_id': 'INT',
       'car_type': 'VARCHAR(100)',
       'make': 'VARCHAR(100)',
       'budget_min': 'INT',
