@@ -3,8 +3,8 @@
     <div class="container">
       <div style="padding: 3rem 0;">
         <div class="section-header">
-          <div class="section-tag">⭐ CUSTOMER REVIEWS</div>
-          <h2 class="section-title">What Our Customers Say</h2>
+          <div class="section-tag">CUSTOMER REVIEWS</div>
+          <h2 class="section-title white">What Our Customers Say</h2>
           <p class="section-subtitle">Real feedback from satisfied clients using DriveSure</p>
         </div>
 
@@ -21,7 +21,7 @@
                  :data-current-index="currentReviewIndex">
               <div class="review-content">
                 <div class="stars">
-                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
+                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">★</span>
                 </div>
                 <p class="review-text">"{{ review.text }}"</p>
                 <div class="review-author">
@@ -41,7 +41,7 @@
             <div class="carousel-dots">
               <button v-for="(review, index) in reviews"
                       :key="`dot-${review.id}`"
-                      @click="currentReviewIndex = index; console.log('🔘 Selected review index:', index)"
+                      @click="currentReviewIndex = index; console.log('Review selected:', index)"
                       class="dot"
                       :class="{ active: index === currentReviewIndex }"
                       :title="`Review ${index + 1} of ${reviews.length}`"></button>
@@ -57,14 +57,14 @@
 
         <!-- Empty State -->
         <div v-else class="empty-state">
-          <div class="empty-icon">💬</div>
+          <div class="empty-icon">✦</div>
           <p>Be the first to share your experience with us!</p>
         </div>
 
         <!-- Leave Review Button (Only for logged-in customers) -->
         <div v-if="currentUser && currentUser.role === 'customer'" class="review-action">
           <button @click="goToReviewForm" class="btn-leave-review">
-            ⭐ Leave Your Review
+            Share Your Review
           </button>
         </div>
       </div>
