@@ -23,15 +23,30 @@ const verifyToken = (req, res, next) => {
 router.get('/:userId', verifyToken, async (req, res) => {
   let connection;
   try {
-    console.log('📊 GET /api/profile/:' + req.params.userId + ' called at', new Date().toISOString());
+    const userId = req.params.userId;
+    console.log('📊 GET /api/profile/:' + userId + ' called at', new Date().toISOString());
+    console.log('   User making request (from token):', req.user);
     
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    const [users] = await connection.query('SELECT id, first_name, last_name, email, phone, role, profile_picture, created_at FROM users WHERE id = ?', [req.params.userId]);
+    const [users] = await connection.query('SELECT id, first_name, last_name, email, phone, role, profile_picture, created_at FROM users WHERE id = ?', [userId]);
     console.log('✅ Query executed, found', users.length, 'user(s)');
+    
+    if (users.length > 0) {
+      console.log('   User data:', {
+        id: users[0].id,
+        first_name: users[0].first_name,
+        last_name: users[0].last_name,
+        email: users[0].email,
+        phone: users[0].phone,
+        role: users[0].role,
+        created_at: users[0].created_at
+      });
+    }
 
     if (users.length === 0) {
+      console.warn('⚠️ User not found with ID:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 

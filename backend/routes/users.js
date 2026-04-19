@@ -7,11 +7,17 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/users called at', new Date().toISOString());
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [users] = await connection.query('SELECT id, first_name, last_name, email, phone, role, created_at FROM users ORDER BY created_at DESC');
+    console.log('✅ Query executed, found', users.length, 'user(s)');
+    console.log('   Users:', users.map(u => ({ id: u.id, name: u.first_name + ' ' + u.last_name, role: u.role })));
+    
     res.json(users);
   } catch (error) {
-    console.error('Get users error:', error);
+    console.error('❌ Get users error:', error);
     res.status(500).json({ error: 'Failed to get users' });
   } finally {
     if (connection) {

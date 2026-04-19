@@ -369,37 +369,47 @@ const fetchUserData = async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem('driveSureUser'));
     const token = localStorage.getItem('token');
+    
+    console.log('👤 AdminProfile: Fetching data for user ID:', storedUser.id);
 
     // Fetch admin profile
+    console.log('🔄 Fetching admin profile from /api/profile/' + storedUser.id);
     const response = await axios.get(
       `https://drivesure-production.up.railway.app/api/profile/${storedUser.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log('✅ Admin profile response:', response.data);
     user.value = response.data;
     editData.value = { first_name: response.data.first_name, last_name: response.data.last_name, phone: response.data.phone };
 
     // Fetch all users
+    console.log('🔄 Fetching all users from /api/users');
     const usersResponse = await axios.get(
       `https://drivesure-production.up.railway.app/api/users`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log('✅ Users response:', usersResponse.data);
     allUsers.value = usersResponse.data.map(u => ({
       ...u,
       active: true // All users from DB are considered active by default
     }));
 
     // Fetch reviews
+    console.log('🔄 Fetching all reviews from /api/reviews');
     const revResponse = await axios.get(
       `https://drivesure-production.up.railway.app/api/reviews`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log('✅ Reviews response:', revResponse.data);
     reviews.value = revResponse.data;
 
     // Fetch contact messages
+    console.log('🔄 Fetching contact messages from /api/contact');
     const msgResponse = await axios.get(
       `https://drivesure-production.up.railway.app/api/contact`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log('✅ Contact messages response:', msgResponse.data);
     contactMessages.value = msgResponse.data;
 
     // Calculate stats
@@ -408,9 +418,15 @@ const fetchUserData = async () => {
       pending_reviews: reviews.value.filter(r => !r.approved).length,
       contact_messages: contactMessages.value.length
     };
+    console.log('📊 Stats calculated:', stats.value);
   } catch (error) {
-    console.error('Failed to fetch user data:', error);
-    showMessage('Failed to load admin data', 'error');
+    console.error('❌ Failed to fetch user data:', error);
+    console.error('   Error message:', error.message);
+    if (error.response) {
+      console.error('   Response status:', error.response.status);
+      console.error('   Response data:', error.response.data);
+    }
+    showMessage('Failed to load admin data: ' + error.message, 'error');
   }
 };
 
