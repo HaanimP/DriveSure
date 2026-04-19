@@ -16,51 +16,24 @@ const getEnvValue = (key) => {
   return value.replace(/^["']|["']$/g, '');
 };
 
-// Build connection from database URL if available, otherwise use individual vars
-let poolConfig;
-const dbUrl = getEnvValue(process.env.MYSQL_URL) || getEnvValue(process.env.DATABASE_URL);
+// Build pool configuration
+const poolConfig = {
+  host: getEnvValue('DB_HOST') || 'mysql.railway.internal',
+  port: parseInt(getEnvValue('DB_PORT')) || 3306,
+  user: getEnvValue('DB_USER') || 'root',
+  password: getEnvValue('DB_PASSWORD'),
+  database: getEnvValue('DB_NAME') || 'railway',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
 
-if (dbUrl && dbUrl.startsWith('mysql://')) {
-  // Parse connection string: mysql://user:password@host:port/database
-  try {
-    const url = new URL(dbUrl);
-    poolConfig = {
-      host: url.hostname,
-      port: parseInt(url.port) || 3306,
-      user: url.username,
-      password: url.password,
-      database: url.pathname.substring(1), // Remove leading /
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    };
-  } catch (error) {
-    console.error('Failed to parse MYSQL_URL:', error);
-    // Fall back to individual variables
-    poolConfig = {
-      host: getEnvValue('DB_HOST'),
-      user: getEnvValue('DB_USER'),
-      password: getEnvValue('DB_PASSWORD'),
-      database: getEnvValue('DB_NAME'),
-      port: parseInt(getEnvValue('DB_PORT')) || 3306,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    };
-  }
-} else {
-  // Use individual environment variables
-  poolConfig = {
-    host: getEnvValue('DB_HOST'),
-    user: getEnvValue('DB_USER'),
-    password: getEnvValue('DB_PASSWORD'),
-    database: getEnvValue('DB_NAME'),
-    port: parseInt(getEnvValue('DB_PORT')) || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  };
-}
+console.log('Database Config:', {
+  host: poolConfig.host,
+  port: poolConfig.port,
+  user: poolConfig.user,
+  database: poolConfig.database
+});
 
 const pool = mysql.createPool(poolConfig);
 
