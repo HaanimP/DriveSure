@@ -16,13 +16,15 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verify transporter on startup
+// Verify transporter on startup (non-blocking)
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ Email transporter configuration error:', error);
+    console.warn('⚠️ Email transporter not available (emails won\'t be sent):', error.code);
   } else {
     console.log('✅ Email transporter verified and ready');
   }
+}).catch(err => {
+  console.warn('⚠️ Email transporter verification failed:', err.code);
 });
 
 // Submit contact form
