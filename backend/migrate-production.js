@@ -61,6 +61,27 @@ async function runMigration() {
         }
       }
     }
+    
+    // Fix request_id to allow NULL if it doesn't
+    try {
+      const [columnDetails] = await connection.query(`
+        SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT 
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway' AND COLUMN_NAME = 'request_id'
+      `);
+      
+      if (columnDetails.length > 0) {
+        const colInfo = columnDetails[0];
+        if (colInfo.IS_NULLABLE === 'NO') {
+          console.log('⚠️  request_id is NOT NULL, fixing to allow NULL...');
+          await connection.query(`ALTER TABLE reviews MODIFY COLUMN request_id INT DEFAULT NULL`);
+          console.log('✅ Modified request_id to allow NULL');
+        }
+      }
+    } catch (err) {
+      console.log('⚠️  Error checking/fixing request_id:', err.message);
+    }
+    
     console.log('✅ Reviews table schema verified');
     
     // 1b. Fix requests table - ensure it has all required columns
