@@ -48,18 +48,40 @@ async function runMigration() {
       WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway'
     `);
     const reviewColumnNames = reviewColumns.map(col => col.COLUMN_NAME);
+    console.log('📊 Reviews table columns:', reviewColumnNames.join(', '));
     
-    // Check if we need to add customer_id
-    if (!reviewColumnNames.includes('customer_id') && reviewColumnNames.includes('user_id')) {
-      console.log('📋 Reviews table has user_id, creating alias column customer_id...');
+    // Ensure customer_id exists (primary), with user_id as fallback
+    if (!reviewColumnNames.includes('customer_id')) {
+      console.log('📋 Adding customer_id column to reviews table...');
       try {
-        await connection.query(`ALTER TABLE reviews ADD COLUMN customer_id INT`);
+        await connection.query(`ALTER TABLE reviews ADD COLUMN customer_id INT DEFAULT NULL`);
         console.log('✅ Added customer_id column to reviews table');
       } catch (err) {
-        if (err.code === 'ER_DUP_FIELDNAME') {
+        if (err.code !== 'ER_DUP_FIELDNAME') {
+          console.log('⚠️  Error adding customer_id:', err.message);
+        } else {
           console.log('✅ customer_id column already exists in reviews');
         }
       }
+    } else {
+      console.log('✅ customer_id column already exists in reviews');
+    }
+    
+    // Also ensure user_id exists for compatibility
+    if (!reviewColumnNames.includes('user_id')) {
+      console.log('📋 Adding user_id column to reviews table (compatibility)...');
+      try {
+        await connection.query(`ALTER TABLE reviews ADD COLUMN user_id INT DEFAULT NULL`);
+        console.log('✅ Added user_id column to reviews table');
+      } catch (err) {
+        if (err.code !== 'ER_DUP_FIELDNAME') {
+          console.log('⚠️  Error adding user_id:', err.message);
+        } else {
+          console.log('✅ user_id column already exists in reviews');
+        }
+      }
+    } else {
+      console.log('✅ user_id column already exists in reviews');
     }
     
     // 1b. Fix requests table - ensure it has all required columns
