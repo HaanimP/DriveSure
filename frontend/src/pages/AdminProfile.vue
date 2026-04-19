@@ -338,37 +338,24 @@ const saveProfile = async () => {
   try {
     const token = localStorage.getItem('token');
     
-    // Prepare form data for multipart upload
-    const formData = new FormData();
-    formData.append('first_name', editData.value.first_name);
-    formData.append('last_name', editData.value.last_name);
-    formData.append('phone', editData.value.phone);
-
-    // Handle profile picture if it's a data URL (from compression)
-    if (editData.value.profile_picture && editData.value.profile_picture.startsWith('data:')) {
-      // Convert data URL to blob
-      const response = await fetch(editData.value.profile_picture);
-      const blob = await response.blob();
-      formData.append('profile_picture', blob, 'profile.jpg');
-    }
-
-    await axios.post(
-      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}/update`,
-      formData,
+    await axios.put(
+      `https://drivesure-production.up.railway.app/api/profile/${user.value.id}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      }
+        first_name: editData.value.first_name,
+        last_name: editData.value.last_name,
+        phone: editData.value.phone,
+        profile_picture: editData.value.profile_picture
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    // Update local user data without the large data URL
+    // Update local user data
     user.value = {
       ...user.value,
       first_name: editData.value.first_name,
       last_name: editData.value.last_name,
-      phone: editData.value.phone
+      phone: editData.value.phone,
+      profile_picture: editData.value.profile_picture
     };
     
     showMessage('Profile updated successfully!', 'success');
