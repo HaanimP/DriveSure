@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
     const pl = req.body.plan || 'Premium';
     const nt = req.body.notes || '';
 
-    console.log('POST /requests received:');
+    console.log('📝 POST /api/requests received at', new Date().toISOString());
     console.log('  user_id:', uid);
     console.log('  car_type:', ctype);
     console.log('  make:', mk);
@@ -35,19 +35,22 @@ router.post('/', async (req, res) => {
     if (bmin === undefined || bmin === null) return res.status(400).json({ error: 'Missing budget_min' });
     if (bmax === undefined || bmax === null) return res.status(400).json({ error: 'Missing budget_max' });
 
-    console.log('All validations passed');
+    console.log('✅ All validations passed');
 
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [result] = await connection.query(
       'INSERT INTO requests (user_id, car_type, make, year_range, budget_min, budget_max, area, plan, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [uid, ctype, mk, yr, bmin, bmax, ar, pl, nt, 'pending']
     );
 
-    console.log('Request created - ID:', result.insertId);
+    console.log('✅ Request created - ID:', result.insertId);
     res.json({ id: result.insertId, message: 'Request created successfully' });
   } catch (error) {
-    console.error('ERROR:', error.message, error.code);
-    res.status(500).json({ error: 'Failed to create request', code: error.code });
+    console.error('❌ Create request error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to create request', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
@@ -63,17 +66,24 @@ router.post('/', async (req, res) => {
 router.get('/all', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/requests/all called at', new Date().toISOString());
+    
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [requests] = await connection.query(`
       SELECT r.*, u.first_name, u.last_name, u.email, u.phone
       FROM requests r
       JOIN users u ON r.user_id = u.id
       ORDER BY r.created_at DESC
     `);
+    console.log('✅ Query executed, found', requests.length, 'requests');
+    
     res.json({ requests });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to fetch requests' });
+    console.error('❌ Get requests error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to fetch requests', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
@@ -89,7 +99,11 @@ router.get('/all', async (req, res) => {
 router.get('/agent/view', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/requests/agent/view called at', new Date().toISOString());
+    
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [requests] = await connection.query(`
       SELECT r.*, u.first_name, u.last_name, u.email, u.phone
       FROM requests r
@@ -97,10 +111,13 @@ router.get('/agent/view', async (req, res) => {
       WHERE r.status IN ('pending', 'in-progress')
       ORDER BY r.created_at DESC
     `);
+    console.log('✅ Query executed, found', requests.length, 'requests');
+    
     res.json({ requests });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to fetch requests' });
+    console.error('❌ Get agent requests error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to fetch requests', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
@@ -116,13 +133,20 @@ router.get('/agent/view', async (req, res) => {
 router.get('/user/:userId', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/requests/user/:' + req.params.userId + ' called at', new Date().toISOString());
+    
     const { userId } = req.params;
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [requests] = await connection.query('SELECT * FROM requests WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+    console.log('✅ Query executed, found', requests.length, 'requests for user', userId);
+    
     res.json({ requests });
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to get requests' });
+    console.error('❌ Get user requests error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to get requests', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
@@ -138,12 +162,19 @@ router.get('/user/:userId', async (req, res) => {
 router.get('/', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/requests called at', new Date().toISOString());
+    
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [requests] = await connection.query('SELECT * FROM requests ORDER BY created_at DESC');
+    console.log('✅ Query executed, found', requests.length, 'requests');
+    
     res.json(requests);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to get requests' });
+    console.error('❌ Get requests error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to get requests', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {

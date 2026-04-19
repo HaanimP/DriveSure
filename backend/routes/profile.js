@@ -23,8 +23,13 @@ const verifyToken = (req, res, next) => {
 router.get('/:userId', verifyToken, async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/profile/:' + req.params.userId + ' called at', new Date().toISOString());
+    
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
+    
     const [users] = await connection.query('SELECT id, first_name, last_name, email, phone, role, profile_picture, created_at FROM users WHERE id = ?', [req.params.userId]);
+    console.log('✅ Query executed, found', users.length, 'user(s)');
 
     if (users.length === 0) {
       return res.status(404).json({ error: 'User not found' });
@@ -32,8 +37,9 @@ router.get('/:userId', verifyToken, async (req, res) => {
 
     res.json(users[0]);
   } catch (error) {
-    console.error('Profile fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch profile' });
+    console.error('❌ Profile fetch error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to fetch profile', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
@@ -49,13 +55,17 @@ router.get('/:userId', verifyToken, async (req, res) => {
 router.put('/:userId', verifyToken, async (req, res) => {
   let connection;
   try {
+    console.log('📝 PUT /api/profile/:' + req.params.userId + ' called at', new Date().toISOString());
+    
     const { first_name, last_name, phone, profile_picture } = req.body;
     connection = await pool.getConnection();
+    console.log('✅ Database connection obtained');
 
     const [result] = await connection.query(
       'UPDATE users SET first_name = ?, last_name = ?, phone = ?, profile_picture = ? WHERE id = ?',
       [first_name, last_name, phone || '', profile_picture || null, req.params.userId]
     );
+    console.log('✅ Query executed, affected rows:', result.affectedRows);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'User not found' });
@@ -63,8 +73,9 @@ router.put('/:userId', verifyToken, async (req, res) => {
 
     res.json({ message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Profile update error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    console.error('❌ Profile update error:', error.message, error.code);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({ error: 'Failed to update profile', code: error.code, message: error.message });
   } finally {
     if (connection) {
       try {
