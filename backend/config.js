@@ -16,15 +16,32 @@ const getEnvValue = (key) => {
   return value.replace(/^["']|["']$/g, '');
 };
 
-const pool = mysql.createPool({
-  host: getEnvValue('DB_HOST') || 'mysql',  // Default to 'mysql' service name in Railway
-  user: getEnvValue('DB_USER') || 'root',
-  password: getEnvValue('DB_PASSWORD'),
-  database: getEnvValue('DB_NAME') || 'railway',
-  port: getEnvValue('DB_PORT') || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+// Build connection from database URL if available, otherwise use individual vars
+let poolConfig;
+const dbUrl = process.env.MYSQL_URL || process.env.DATABASE_URL;
+
+if (dbUrl) {
+  // Parse connection string (mysql://user:pass@host:port/database)
+  poolConfig = {
+    uri: dbUrl,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+} else {
+  // Use individual environment variables
+  poolConfig = {
+    host: getEnvValue('DB_HOST'),
+    user: getEnvValue('DB_USER'),
+    password: getEnvValue('DB_PASSWORD'),
+    database: getEnvValue('DB_NAME'),
+    port: parseInt(getEnvValue('DB_PORT')) || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  };
+}
+
+const pool = mysql.createPool(poolConfig);
 
 export default pool;
