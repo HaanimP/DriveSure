@@ -56,8 +56,27 @@ router.get('/', async (req, res) => {
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
     
-    const [reviews] = await connection.query('SELECT * FROM reviews WHERE approved = true ORDER BY created_at DESC');
+    // Join with users table to get user name, map database columns to frontend format
+    const [reviews] = await connection.query(`
+      SELECT 
+        r.id,
+        r.rating as stars,
+        r.comment as text,
+        COALESCE(u.first_name, 'Anonymous') as user_name,
+        'Premium' as plan,
+        r.customer_id,
+        r.request_id,
+        r.agent_id,
+        r.is_approved,
+        r.approved,
+        r.created_at
+      FROM reviews r
+      LEFT JOIN users u ON r.customer_id = u.id
+      WHERE r.approved = true
+      ORDER BY r.created_at DESC
+    `);
     console.log('✅ Query executed, found', reviews.length, 'reviews');
+    console.log('📋 Sample review:', reviews.length > 0 ? reviews[0] : 'none');
     
     res.json(reviews);
   } catch (error) {
@@ -79,12 +98,33 @@ router.get('/', async (req, res) => {
 router.get('/admin/all', async (req, res) => {
   let connection;
   try {
+    console.log('📊 GET /api/reviews/admin/all called');
+    
     connection = await pool.getConnection();
-    const [reviews] = await connection.query('SELECT * FROM reviews ORDER BY created_at DESC');
+    
+    // Join with users table to get user name and request info
+    const [reviews] = await connection.query(`
+      SELECT 
+        r.id,
+        r.rating as stars,
+        r.comment as text,
+        COALESCE(u.first_name, 'Anonymous') as user_name,
+        'Premium' as plan,
+        r.customer_id,
+        r.request_id,
+        r.agent_id,
+        r.is_approved,
+        r.approved,
+        r.created_at
+      FROM reviews r
+      LEFT JOIN users u ON r.customer_id = u.id
+      ORDER BY r.created_at DESC
+    `);
+    console.log('✅ Admin query executed, found', reviews.length, 'reviews');
     res.json(reviews);
   } catch (error) {
-    console.error('Get all reviews error:', error);
-    res.status(500).json({ error: 'Failed to get reviews' });
+    console.error('❌ Get all reviews error:', error.message);
+    res.status(500).json({ error: 'Failed to get reviews', details: error.message });
   } finally {
     if (connection) {
       try {
