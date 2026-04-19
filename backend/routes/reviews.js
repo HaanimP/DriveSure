@@ -7,12 +7,19 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   let connection;
   try {
-    const { userId, requestId, rating, comment } = req.body;
-    console.log('📝 Creating review with data:', { userId, requestId, rating, comment });
+    // Accept both old format (stars, text, plan) and new format (rating, comment, requestId)
+    const { userId, userName, stars, text, plan, requestId, rating, comment } = req.body;
+    console.log('📝 Creating review with data:', req.body);
 
-    if (!userId || !requestId || !rating || !comment) {
-      console.warn('⚠️ Missing required fields:', { userId, requestId, rating, comment });
-      return res.status(400).json({ error: 'Missing required fields: userId, requestId, rating, comment' });
+    // Map frontend fields to database fields
+    const customerId = userId;
+    const reviewRating = rating || stars;
+    const reviewComment = comment || text;
+    const reviewRequestId = requestId || null;
+
+    if (!customerId || !reviewRating || !reviewComment) {
+      console.warn('⚠️ Missing required fields:', { customerId, reviewRating, reviewComment });
+      return res.status(400).json({ error: 'Missing required fields: userId, rating/stars, comment/text' });
     }
 
     connection = await pool.getConnection();
@@ -21,7 +28,7 @@ router.post('/', async (req, res) => {
     const [result] = await connection.query(
       `INSERT INTO reviews (customer_id, request_id, rating, comment, is_approved, approved)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, requestId, rating, comment, true, true]
+      [customerId, reviewRequestId, reviewRating, reviewComment, true, true]
     );
 
     console.log('✅ Review created - ID:', result.insertId);
