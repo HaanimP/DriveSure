@@ -31,8 +31,8 @@
             </div>
           </div>
 
-          <!-- Carousel Controls -->
-          <div class="carousel-controls">
+          <!-- Carousel Controls (Only show if multiple reviews) -->
+          <div v-if="reviews.length > 1" class="carousel-controls">
             <button @click="previousReview" class="carousel-btn prev">‹</button>
             <div class="carousel-dots">
               <button v-for="(review, index) in reviews"
@@ -42,6 +42,11 @@
                       :class="{ active: index === currentReviewIndex }"></button>
             </div>
             <button @click="nextReview" class="carousel-btn next">›</button>
+          </div>
+          
+          <!-- Single Review Info -->
+          <div v-else class="single-review-info">
+            <p>{{ reviews.length }} review posted so far. More reviews coming soon!</p>
           </div>
         </div>
 
@@ -302,6 +307,16 @@ const goToReviewForm = () => {
   align-items: center;
   justify-content: center;
   gap: 2rem;
+  margin-top: 2rem;
+}
+
+.single-review-info {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  font-style: italic;
 }
 
 .carousel-btn {
