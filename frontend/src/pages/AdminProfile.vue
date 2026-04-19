@@ -254,7 +254,7 @@ const approvedReviews = computed(() => reviews.value.filter(r => r.approved));
 const triggerFileInput = () => fileInput.value?.click();
 
 const compressImage = (file) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
@@ -262,11 +262,16 @@ const compressImage = (file) => {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const maxWidth = 800;
-        const maxHeight = 800;
+        
+        // Check device type - use smaller dimensions for mobile
+        const isMobile = window.innerWidth < 768;
+        const maxWidth = isMobile ? 400 : 600;
+        const maxHeight = isMobile ? 400 : 600;
+        
         let width = img.width;
         let height = img.height;
 
+        // Maintain aspect ratio
         if (width > height) {
           if (width > maxWidth) {
             height *= maxWidth / width;
@@ -284,10 +289,21 @@ const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Compress to JPEG with 0.8 quality
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
+        // Start with quality 0.7, lower for mobile if needed
+        let quality = isMobile ? 0.6 : 0.7;
+        let compressed = canvas.toDataURL('image/jpeg', quality);
+        
+        // If still too large (over 200KB), reduce quality further
+        if (compressed.length > 200 * 1024) {
+          quality = 0.4;
+          compressed = canvas.toDataURL('image/jpeg', quality);
+        }
+        
+        resolve(compressed);
       };
+      img.onerror = () => reject(new Error('Failed to load image'));
     };
+    reader.onerror = () => reject(new Error('Failed to read file'));
   });
 };
 

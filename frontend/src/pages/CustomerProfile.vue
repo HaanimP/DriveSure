@@ -169,13 +169,74 @@ const triggerFileInput = () => fileInput.value?.click();
 const onPictureChange = async (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      profilePicture.value = e.target.result;
-      editData.value.profile_picture = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      if (file.size > 5 * 1024 * 1024) {
+        showMessage('Image is too large. Please choose a file under 5MB.', 'error');
+        return;
+      }
+
+      const compressedImage = await compressImage(file);
+      profilePicture.value = compressedImage;
+      editData.value.profile_picture = compressedImage;
+      showMessage('Image compressed and ready to upload', 'success');
+    } catch (error) {
+      showMessage('Failed to process image', 'error');
+    }
   }
+};
+
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        
+        // Check device type - use smaller dimensions for mobile
+        const isMobile = window.innerWidth < 768;
+        const maxWidth = isMobile ? 400 : 600;
+        const maxHeight = isMobile ? 400 : 600;
+        
+        let width = img.width;
+        let height = img.height;
+
+        // Maintain aspect ratio
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Start with quality 0.7, lower for mobile if needed
+        let quality = isMobile ? 0.6 : 0.7;
+        let compressed = canvas.toDataURL('image/jpeg', quality);
+        
+        // If still too large (over 200KB), reduce quality further
+        if (compressed.length > 200 * 1024) {
+          quality = 0.4;
+          compressed = canvas.toDataURL('image/jpeg', quality);
+        }
+        
+        resolve(compressed);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+  });
 };
 
 const getInitials = (first, last) => {
