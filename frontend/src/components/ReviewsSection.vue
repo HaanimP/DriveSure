@@ -12,9 +12,11 @@
         <div v-if="reviews.length > 0" class="carousel-container">
           <div class="reviews-carousel">
             <div v-for="(review, index) in reviews" 
-                 :key="review.id"
+                 :key="`review-${review.id}`"
                  class="review-card"
-                 :class="{ active: index === currentReviewIndex }">
+                 :class="{ active: index === currentReviewIndex }"
+                 :data-review-id="review.id"
+                 :data-review-index="index">
               <div class="review-content">
                 <div class="stars">
                   <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
@@ -36,10 +38,11 @@
             <button @click="previousReview" class="carousel-btn prev">‹</button>
             <div class="carousel-dots">
               <button v-for="(review, index) in reviews"
-                      :key="review.id"
-                      @click="currentReviewIndex = index"
+                      :key="`dot-${review.id}`"
+                      @click="currentReviewIndex = index; console.log('🔘 Selected review index:', index)"
                       class="dot"
-                      :class="{ active: index === currentReviewIndex }"></button>
+                      :class="{ active: index === currentReviewIndex }"
+                      :title="`Review ${index + 1} of ${reviews.length}`"></button>
             </div>
             <button @click="nextReview" class="carousel-btn next">›</button>
           </div>
@@ -89,6 +92,10 @@ const fetchReviews = async () => {
     console.log('📊 Is Array?', Array.isArray(response))
     reviews.value = Array.isArray(response) ? response : response.reviews || []
     console.log('✅ Reviews set to:', reviews.value)
+    console.log('📊 Reviews length:', reviews.value.length)
+    console.log('📊 Review IDs:', reviews.value.map(r => r.id).join(', '))
+    console.log('📊 Review texts:', reviews.value.map(r => r.text).join(' | '))
+    console.log('📊 Current index:', currentReviewIndex.value)
   } catch (err) {
     console.error('❌ Error loading reviews:', err)
   }
@@ -96,11 +103,15 @@ const fetchReviews = async () => {
 
 // Carousel navigation
 const nextReview = () => {
+  if (reviews.value.length <= 1) return
   currentReviewIndex.value = (currentReviewIndex.value + 1) % reviews.value.length
+  console.log('➡️ Next review - now at index:', currentReviewIndex.value, 'of', reviews.value.length)
 }
 
 const previousReview = () => {
+  if (reviews.value.length <= 1) return
   currentReviewIndex.value = (currentReviewIndex.value - 1 + reviews.value.length) % reviews.value.length
+  console.log('⬅️ Previous review - now at index:', currentReviewIndex.value, 'of', reviews.value.length)
 }
 
 // Auto-rotate carousel and watch for new reviews
