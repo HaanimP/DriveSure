@@ -42,6 +42,45 @@ async function runMigration() {
       }
     }
     
+    // 1b. Fix requests table - ensure it has all required columns
+    console.log('\n📋 Checking requests table schema...');
+    const [requestColumns] = await connection.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_NAME = 'requests' AND TABLE_SCHEMA = 'railway'
+    `);
+    
+    const requestColumnNames = requestColumns.map(col => col.COLUMN_NAME);
+    
+    // Check and add missing columns
+    const requiredColumns = {
+      'user_id': 'INT NOT NULL',
+      'car_type': 'VARCHAR(100)',
+      'make': 'VARCHAR(100)',
+      'budget_min': 'INT',
+      'budget_max': 'INT',
+      'area': 'VARCHAR(100)',
+      'year_range': 'VARCHAR(50)',
+      'plan': 'VARCHAR(100)',
+      'viewing_preference': 'VARCHAR(100)',
+      'notes': 'TEXT',
+      'status': "VARCHAR(50) DEFAULT 'pending'",
+      'agent_notes': 'TEXT',
+      'schedule_date': 'DATE'
+    };
+    
+    for (const [colName, colType] of Object.entries(requiredColumns)) {
+      if (!requestColumnNames.includes(colName)) {
+        console.log(`⚠️  Adding missing column: ${colName}`);
+        try {
+          await connection.query(`ALTER TABLE requests ADD COLUMN ${colName} ${colType}`);
+          console.log(`✅ Added ${colName} column to requests table`);
+        } catch (err) {
+          console.log(`⚠️  Could not add ${colName}:`, err.message);
+        }
+      }
+    }
+    console.log('✅ Requests table schema verified');
+    
     // 2. Ensure users table has password_hash instead of password
     console.log('\n📋 Checking users table schema...');
     const [columns] = await connection.query(`
