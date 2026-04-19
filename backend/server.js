@@ -62,9 +62,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Backend is running' });
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Unhandled error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message 
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Drive Sure Backend running on http://localhost:${PORT}`);
+  console.log(`✅ CORS enabled for: https://drive-sure-lyart.vercel.app`);
 });
 
 export { pool };

@@ -37,4 +37,19 @@ console.log('Database Config:', {
 
 const pool = mysql.createPool(poolConfig);
 
+// Handle pool connection errors
+pool.on('error', (err) => {
+  console.error('❌ Database pool error:', err);
+});
+
+// Test connection on startup
+pool.getConnection()
+  .then(conn => {
+    console.log('✅ Database connection successful');
+    conn.release();
+  })
+  .catch(err => {
+    console.error('⚠️  Database connection failed (will retry on demand):', err.message);
+  });
+
 export default pool;
