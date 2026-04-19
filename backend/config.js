@@ -69,8 +69,10 @@ pool.on('connection', (connection) => {
 });
 
 console.log('⏳ Testing database connection...');
-// Test connection on startup with proper error handling
-testConnection();
+// Test connection on startup with proper error handling (non-blocking)
+testConnection().catch(err => {
+  console.error('⚠️ Startup test failed:', err.message);
+}); // Don't block startup on test failure
 
 async function testConnection() {
   let connection;
