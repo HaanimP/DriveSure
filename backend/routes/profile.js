@@ -34,12 +34,11 @@ const verifyToken = (req, res, next) => {
 };
 
 // Get user profile
-router.get('/:userId', verifyToken, async (req, res) => {
+router.get('/:userId', async (req, res) => {
   let connection;
   try {
     const userId = req.params.userId;
     console.log('📊 GET /api/profile/:' + userId + ' called at', new Date().toISOString());
-    console.log('   User making request (from token):', req.user);
     
     connection = await pool.getConnection();
     console.log('✅ Database connection obtained');
@@ -81,7 +80,7 @@ router.get('/:userId', verifyToken, async (req, res) => {
 });
 
 // Update user profile
-router.put('/:userId', verifyToken, async (req, res) => {
+router.put('/:userId', async (req, res) => {
   let connection;
   try {
     console.log('📝 PUT /api/profile/:' + req.params.userId + ' called at', new Date().toISOString());
@@ -117,7 +116,7 @@ router.put('/:userId', verifyToken, async (req, res) => {
 });
 
 // Change password
-router.post('/:userId/change-password', verifyToken, async (req, res) => {
+router.post('/:userId/change-password', async (req, res) => {
   let connection;
   try {
     const { currentPassword, newPassword } = req.body;
@@ -157,7 +156,7 @@ router.post('/:userId/change-password', verifyToken, async (req, res) => {
 });
 
 // Get user statistics (for agents/admin)
-router.get('/:userId/stats', verifyToken, async (req, res) => {
+router.get('/:userId/stats', async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
