@@ -77,7 +77,7 @@ router.get('/user/:userId', async (req, res) => {
     `, [userId]);
     
     console.log('✅ User reviews query executed, found', reviews.length, 'reviews for user', userId);
-    console.log('📋 Reviews:', reviews);
+    console.log('📋 ALL USER REVIEWS:', JSON.stringify(reviews, null, 2));
     
     res.json(reviews);
   } catch (error) {
@@ -163,11 +163,11 @@ router.get('/', async (req, res) => {
         r.created_at
       FROM reviews r
       LEFT JOIN users u ON r.customer_id = u.id
-      WHERE r.approved = true
+      WHERE r.approved = 1 OR r.approved = true
       ORDER BY r.created_at DESC
     `);
     console.log('✅ Query executed, found', reviews.length, 'reviews');
-    console.log('📋 Sample review:', reviews.length > 0 ? reviews[0] : 'none');
+    console.log('📋 ALL REVIEWS:', JSON.stringify(reviews, null, 2));
     
     res.json(reviews);
   } catch (error) {
@@ -212,6 +212,7 @@ router.get('/admin/all', async (req, res) => {
       ORDER BY r.created_at DESC
     `);
     console.log('✅ Admin query executed, found', reviews.length, 'reviews');
+    console.log('📋 ALL ADMIN REVIEWS:', JSON.stringify(reviews, null, 2));
     res.json(reviews);
   } catch (error) {
     console.error('❌ Get all reviews error:', error.message);
