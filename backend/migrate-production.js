@@ -93,6 +93,34 @@ async function runMigration() {
       console.log(`✅ Created admin user`);
     }
     
+    // 3b. Seed agent user
+    console.log('\n👤 Seeding agent user...');
+    const agentEmail = 'fagrie13@gmail.com';
+    const agentPassword = 'Fagrie@13';
+    
+    const [existingAgent] = await connection.query(
+      'SELECT id FROM users WHERE email = ?',
+      [agentEmail]
+    );
+    
+    if (existingAgent.length > 0) {
+      console.log(`⚠️  Agent user already exists, updating password...`);
+      const hashedPassword = await bcrypt.hash(agentPassword, 10);
+      await connection.query(
+        'UPDATE users SET password_hash = ? WHERE email = ?',
+        [hashedPassword, agentEmail]
+      );
+      console.log(`✅ Updated agent password`);
+    } else {
+      console.log(`➕ Creating agent user...`);
+      const hashedPassword = await bcrypt.hash(agentPassword, 10);
+      await connection.query(
+        'INSERT INTO users (first_name, last_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
+        ['Fagrie', 'Agent', agentEmail, '+27 987 654 3210', hashedPassword, 'agent']
+      );
+      console.log(`✅ Created agent user`);
+    }
+    
     // 4. Verify tables and data
     console.log('\n📊 Verifying database...');
     const [users] = await connection.query('SELECT COUNT(*) as count FROM users');
@@ -107,8 +135,12 @@ async function runMigration() {
     
     console.log('\n✨ Migration completed successfully!');
     console.log('\n🔓 Login credentials:');
-    console.log(`  Email: ${adminEmail}`);
-    console.log(`  Password: ${adminPassword}`);
+    console.log(`  ADMIN:`);
+    console.log(`    Email: ${adminEmail}`);
+    console.log(`    Password: ${adminPassword}`);
+    console.log(`  AGENT:`);
+    console.log(`    Email: ${agentEmail}`);
+    console.log(`    Password: ${agentPassword}`);
     
     connection.release();
     if (pool) {
