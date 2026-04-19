@@ -182,6 +182,7 @@ async function runMigration() {
     
     const hasPasswordColumn = columns.some(col => col.COLUMN_NAME === 'password');
     const hasPasswordHashColumn = columns.some(col => col.COLUMN_NAME === 'password_hash');
+    const hasProfilePictureColumn = columns.some(col => col.COLUMN_NAME === 'profile_picture');
     
     if (hasPasswordColumn && !hasPasswordHashColumn) {
       console.log('⚠️  Renaming password column to password_hash...');
@@ -194,6 +195,17 @@ async function runMigration() {
     } else if (!hasPasswordHashColumn && !hasPasswordColumn) {
       console.log('❌ Neither password nor password_hash column exists!');
       throw new Error('Users table schema is broken');
+    }
+
+    // Add profile_picture column if it doesn't exist
+    if (!hasProfilePictureColumn) {
+      console.log('⚠️  Adding profile_picture column...');
+      await connection.query(`
+        ALTER TABLE users ADD COLUMN profile_picture LONGTEXT DEFAULT NULL
+      `);
+      console.log('✅ Added profile_picture column');
+    } else {
+      console.log('✅ profile_picture column already exists');
     }
     
     // 3. Seed admin user

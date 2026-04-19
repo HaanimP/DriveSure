@@ -389,6 +389,10 @@ const fetchUserData = async () => {
     console.log('✅ Admin profile response:', response.data);
     user.value = response.data;
     editData.value = { first_name: response.data.first_name, last_name: response.data.last_name, phone: response.data.phone };
+    
+    if (response.data.profile_picture) {
+      profilePicture.value = response.data.profile_picture;
+    }
 
     // Fetch all users
     console.log('🔄 Fetching all users from /api/users');
