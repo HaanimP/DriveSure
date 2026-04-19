@@ -107,6 +107,73 @@
       </div>
     </div>
 
+    <!-- My Stats Tab -->
+    <div v-if="activeTab === 'My Stats'" class="tab-content">
+      <div class="info-section">
+        <h2>📊 Performance Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value">{{ stats.total_requests || 0 }}</div>
+            <div class="stat-name">Total Requests</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">{{ stats.completed_requests || 0 }}</div>
+            <div class="stat-name">Completed</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">{{ (stats.average_rating || 0).toFixed(1) }}/5</div>
+            <div class="stat-name">Avg Rating</div>
+          </div>
+        </div>
+        <div style="margin-top: 2rem;">
+          <h3>Customer Reviews About You</h3>
+          <div v-if="reviews.length === 0" class="empty-state">
+            <p>No reviews yet.</p>
+          </div>
+          <div v-else class="items-grid">
+            <div v-for="review in reviews" :key="review.id" class="item-card">
+              <div class="item-header">
+                <div class="stars">
+                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
+                </div>
+              </div>
+              <div class="item-details">
+                <p class="review-text">"{{ review.text }}"</p>
+                <p><strong>Customer:</strong> {{ review.user_name }}</p>
+                <p><strong>Date:</strong> {{ formatDate(review.created_at) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Requests Tab -->
+    <div v-if="activeTab === 'My Requests'" class="tab-content">
+      <div class="info-section">
+        <h2>📋 Assigned Requests</h2>
+        <div v-if="requests.length === 0" class="empty-state">
+          <p>No requests assigned to you yet.</p>
+        </div>
+        <div v-else class="items-grid">
+          <div v-for="request in requests" :key="request.id" class="item-card">
+            <div class="item-header">
+              <h3>{{ request.first_name }} {{ request.last_name }}</h3>
+              <span class="status-badge" :class="request.status">{{ request.status }}</span>
+            </div>
+            <div class="item-details">
+              <p><strong>Looking for:</strong> {{ request.make }} {{ request.car_type }}</p>
+              <p><strong>Year:</strong> {{ request.year_range }}</p>
+              <p><strong>Budget:</strong> R{{ request.budget_min }} - R{{ request.budget_max }}</p>
+              <p><strong>Location:</strong> {{ request.area }}</p>
+              <p><strong>Plan:</strong> {{ request.plan }}</p>
+              <p><strong>Contact:</strong> {{ request.phone }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Messages -->
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
@@ -119,7 +186,7 @@ import axios from 'axios';
 
 const router = useRouter();
 const activeTab = ref('Personal Info');
-const tabs = ['Personal Info'];
+const tabs = ['Personal Info', 'My Stats', 'My Requests'];
 
 const user = ref({});
 const editData = ref({});
@@ -239,12 +306,12 @@ const fetchUserData = async () => {
     );
     requests.value = reqResponse.data.filter(r => r.agent_id === storedUser.id);
 
-    // Fetch reviews
+    // Fetch reviews about this agent (they are the ones getting reviewed)
     const revResponse = await axios.get(
       `https://drivesure-production.up.railway.app/api/reviews`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    reviews.value = revResponse.data.filter(r => r.about_agent_id === storedUser.id);
+    reviews.value = Array.isArray(revResponse.data) ? revResponse.data.filter(r => r.agent_id === storedUser.id) : [];
 
     // Check for agent notifications
     await checkForAgentNotifications(storedUser.id);
@@ -787,6 +854,110 @@ body.dark-mode .form-group input:focus {
   }
 }
 
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin: 20px 0 30px 0;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-name {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Items Grid */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.item-card {
+  background: #f9fafb;
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.item-header h3 {
+  margin: 0;
+  color: #2d5a9f;
+  font-size: 16px;
+  flex: 1;
+}
+
+.item-details {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.item-details p {
+  margin: 8px 0;
+}
+
+.review-text {
+  font-style: italic;
+  color: #555;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #2d5a9f;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  font-size: 18px;
+  opacity: 0.3;
+}
+
+.star.filled {
+  opacity: 1;
+}
+
 @media (max-width: 768px) {
   .profile-container {
     padding-top: 60px;
@@ -821,6 +992,10 @@ body.dark-mode .form-group input:focus {
 
   .stats-section {
     margin-top: 20px;
+  }
+
+  .items-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

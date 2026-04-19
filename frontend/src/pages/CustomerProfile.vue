@@ -86,6 +86,56 @@
       </div>
     </div>
 
+    <!-- My Requests Tab -->
+    <div v-if="activeTab === 'My Requests'" class="tab-content">
+      <div class="info-section">
+        <h2>📋 My Requests</h2>
+        <div v-if="requests.length === 0" class="empty-state">
+          <p>You haven't submitted any requests yet.</p>
+        </div>
+        <div v-else class="items-grid">
+          <div v-for="request in requests" :key="request.id" class="item-card">
+            <div class="item-header">
+              <h3>{{ request.make }} {{ request.car_type }}</h3>
+              <span class="status-badge" :class="request.status">{{ request.status }}</span>
+            </div>
+            <div class="item-details">
+              <p><strong>Year:</strong> {{ request.year_range }}</p>
+              <p><strong>Budget:</strong> R{{ request.budget_min }} - R{{ request.budget_max }}</p>
+              <p><strong>Location:</strong> {{ request.area }}</p>
+              <p><strong>Plan:</strong> {{ request.plan }}</p>
+              <p><strong>Date:</strong> {{ formatDate(request.created_at) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Reviews Tab -->
+    <div v-if="activeTab === 'My Reviews'" class="tab-content">
+      <div class="info-section">
+        <h2>⭐ My Reviews</h2>
+        <div v-if="reviews.length === 0" class="empty-state">
+          <p>You haven't posted any reviews yet.</p>
+        </div>
+        <div v-else class="items-grid">
+          <div v-for="review in reviews" :key="review.id" class="item-card">
+            <div class="item-header">
+              <div class="stars">
+                <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.stars }">⭐</span>
+              </div>
+              <span class="status-badge approved">✓ Posted</span>
+            </div>
+            <div class="item-details">
+              <p><strong>Plan:</strong> {{ review.plan }}</p>
+              <p class="review-text">{{ review.text }}</p>
+              <p><strong>Date:</strong> {{ formatDate(review.created_at) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Messages -->
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
@@ -98,7 +148,7 @@ import axios from 'axios';
 
 const router = useRouter();
 const activeTab = ref('Personal Info');
-const tabs = ['Personal Info'];
+const tabs = ['Personal Info', 'My Requests', 'My Reviews'];
 
 const user = ref({});
 const editData = ref({});
@@ -212,12 +262,12 @@ const fetchUserData = async () => {
     );
     requests.value = reqResponse.data.filter(r => r.customer_id === storedUser.id);
 
-    // Fetch reviews
+    // Fetch reviews for this customer
     const revResponse = await axios.get(
-      `https://drivesure-production.up.railway.app/api/reviews`,
+      `https://drivesure-production.up.railway.app/api/reviews/user/${storedUser.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    reviews.value = revResponse.data.filter(r => r.author_id === storedUser.id);
+    reviews.value = Array.isArray(revResponse.data) ? revResponse.data : revResponse.data.reviews || [];
 
     // Check for request updates and show notifications
     await checkForRequestUpdates(storedUser.id);
@@ -862,6 +912,82 @@ body.dark-mode .review-card .review-plan {
   margin-top: 40px;
 }
 
+/* Items Grid */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.item-card {
+  background: #f9fafb;
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.item-header h3 {
+  margin: 0;
+  color: var(--blue);
+  font-size: 16px;
+  flex: 1;
+}
+
+.item-details {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.item-details p {
+  margin: 8px 0;
+}
+
+.review-text {
+  font-style: italic;
+  color: #555;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid var(--blue);
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+  font-size: 16px;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  font-size: 18px;
+  opacity: 0.3;
+}
+
+.star.filled {
+  opacity: 1;
+}
+
 @media (max-width: 768px) {
   .profile-container {
     padding-top: 60px;
@@ -891,6 +1017,10 @@ body.dark-mode .review-card .review-plan {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .items-grid {
     grid-template-columns: 1fr;
   }
 }
