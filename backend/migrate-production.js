@@ -26,23 +26,8 @@ async function runMigration() {
     
     console.log('✅ Connected to database');
     
-    // 1. Fix reviews table - add approved column if missing
+    // 1. Ensure reviews table has correct schema
     console.log('\n📋 Checking reviews table schema...');
-    try {
-      await connection.query(`
-        ALTER TABLE reviews 
-        ADD COLUMN approved BOOLEAN DEFAULT FALSE
-      `);
-      console.log('✅ Added approved column to reviews table');
-    } catch (err) {
-      if (err.code === 'ER_DUP_FIELDNAME') {
-        console.log('✅ approved column already exists');
-      } else {
-        throw err;
-      }
-    }
-    
-    // 1a. Ensure reviews table has customer_id support
     const [reviewColumns] = await connection.query(`
       SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
       WHERE TABLE_NAME = 'reviews' AND TABLE_SCHEMA = 'railway'
@@ -50,39 +35,33 @@ async function runMigration() {
     const reviewColumnNames = reviewColumns.map(col => col.COLUMN_NAME);
     console.log('📊 Reviews table columns:', reviewColumnNames.join(', '));
     
-    // Ensure customer_id exists (primary), with user_id as fallback
-    if (!reviewColumnNames.includes('customer_id')) {
-      console.log('📋 Adding customer_id column to reviews table...');
-      try {
-        await connection.query(`ALTER TABLE reviews ADD COLUMN customer_id INT DEFAULT NULL`);
-        console.log('✅ Added customer_id column to reviews table');
-      } catch (err) {
-        if (err.code !== 'ER_DUP_FIELDNAME') {
-          console.log('⚠️  Error adding customer_id:', err.message);
-        } else {
-          console.log('✅ customer_id column already exists in reviews');
-        }
-      }
-    } else {
-      console.log('✅ customer_id column already exists in reviews');
-    }
+    // Ensure all required columns exist
+    const requiredReviewColumns = {
+      'customer_id': 'INT DEFAULT NULL',
+      'request_id': 'INT DEFAULT NULL',
+      'agent_id': 'INT DEFAULT NULL',
+      'rating': 'INT DEFAULT NULL',
+      'comment': 'TEXT',
+      'is_approved': 'BOOLEAN DEFAULT FALSE',
+      'approved': 'BOOLEAN DEFAULT FALSE'
+    };
     
-    // Also ensure user_id exists for compatibility
-    if (!reviewColumnNames.includes('user_id')) {
-      console.log('📋 Adding user_id column to reviews table (compatibility)...');
-      try {
-        await connection.query(`ALTER TABLE reviews ADD COLUMN user_id INT DEFAULT NULL`);
-        console.log('✅ Added user_id column to reviews table');
-      } catch (err) {
-        if (err.code !== 'ER_DUP_FIELDNAME') {
-          console.log('⚠️  Error adding user_id:', err.message);
-        } else {
-          console.log('✅ user_id column already exists in reviews');
+    for (const [colName, colType] of Object.entries(requiredReviewColumns)) {
+      if (!reviewColumnNames.includes(colName)) {
+        console.log(`📋 Adding missing column to reviews: ${colName}`);
+        try {
+          await connection.query(`ALTER TABLE reviews ADD COLUMN ${colName} ${colType}`);
+          console.log(`✅ Added ${colName} column to reviews table`);
+        } catch (err) {
+          if (err.code !== 'ER_DUP_FIELDNAME') {
+            console.log(`⚠️  Error adding ${colName}:`, err.message);
+          } else {
+            console.log(`✅ ${colName} column already exists`);
+          }
         }
       }
-    } else {
-      console.log('✅ user_id column already exists in reviews');
     }
+    console.log('✅ Reviews table schema verified');
     
     // 1b. Fix requests table - ensure it has all required columns
     console.log('\n📋 Checking requests table schema...');

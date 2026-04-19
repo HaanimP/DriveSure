@@ -7,28 +7,28 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   let connection;
   try {
-    const { userId, userName, stars, text, plan } = req.body;
-    console.log('📝 Creating review with data:', { userId, userName, stars, text, plan });
+    const { userId, requestId, rating, comment } = req.body;
+    console.log('📝 Creating review with data:', { userId, requestId, rating, comment });
 
-    if (!userId || !stars || !text) {
-      console.warn('⚠️ Missing required fields:', { userId, stars, text });
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!userId || !requestId || !rating || !comment) {
+      console.warn('⚠️ Missing required fields:', { userId, requestId, rating, comment });
+      return res.status(400).json({ error: 'Missing required fields: userId, requestId, rating, comment' });
     }
 
     connection = await pool.getConnection();
     
-    // Production uses customer_id, not user_id
+    // Use actual database columns: customer_id, request_id, rating, comment
     const [result] = await connection.query(
-      `INSERT INTO reviews (customer_id, user_name, stars, text, plan, approved)
+      `INSERT INTO reviews (customer_id, request_id, rating, comment, is_approved, approved)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [userId, userName, stars, text, plan || '', true]
+      [userId, requestId, rating, comment, true, true]
     );
 
     console.log('✅ Review created - ID:', result.insertId);
     res.json({ id: result.insertId, message: 'Review posted successfully' });
   } catch (error) {
     console.error('❌ Create review error:', error.message, error.code);
-    res.status(500).json({ error: 'Failed to create review', code: error.code });
+    res.status(500).json({ error: 'Failed to create review', details: error.message });
   } finally {
     if (connection) {
       try {
