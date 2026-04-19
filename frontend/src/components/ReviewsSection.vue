@@ -127,7 +127,7 @@ const previousReview = () => {
 onMounted(() => {
   fetchReviews()
   
-  // Auto-rotate every 5 seconds
+  // Auto-rotate every 8 seconds (gives time to read each review)
   const autoRotateInterval = setInterval(() => {
     if (reviews.value.length > 1) {
       console.log('⏱️ Auto-rotating carousel...');
@@ -136,7 +136,7 @@ onMounted(() => {
       console.log('   Current index after:', currentReviewIndex.value);
       console.log('   Current review ID:', reviews.value[currentReviewIndex.value]?.id);
     }
-  }, 5000)
+  }, 8000)
 
   // Refresh reviews every 3 seconds to catch newly posted ones
   const refreshInterval = setInterval(() => {
